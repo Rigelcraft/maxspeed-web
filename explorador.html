@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxspeed - Explorador</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .seccion-explorador { width: 100%; max-width: 600px; background: rgba(0, 0, 0, 0.85); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 15px; padding: 20px; margin-top: 15px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); box-sizing: border-box; }
+        .ruta-actual { color: #FF8533; font-weight: bold; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        .grid-carpetas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 15px; min-height: 200px; }
+        .item-clicable { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; padding: 15px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: background 0.2s; }
+        .item-clicable:hover { background: rgba(255, 255, 255, 0.15); }
+        .icono { font-size: 3.5rem; margin-bottom: 8px; }
+        .nombre-item { color: white; font-size: 16px; font-weight: bold; word-break: break-word; }
+        .btn-atras { 
+            background: #e74c3c; 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px;
+            min-width: 80px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        .btn-atras:active {
+            transform: scale(0.97);
+        }
+        .fila-resultado { background: rgba(255,255,255,0.08); padding: 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; border-left: 4px solid #FF8533; }
+        .acciones-container { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="body-menu"> 
+    <div class="contenedor-principal" style="max-width: 600px; width: 100%; padding: 10px;">
+        <header style="text-align: center;">
+            <img src="logo.png" style="width: 250px;">
+        </header>
+
+        <div class="bloque-busqueda" style="margin: 15px 0;">
+            <input type="text" id="buscadorJefe" placeholder="🔍 Buscar cliente, modelo o placa..." onkeyup="ejecutarBusqueda()" style="width: 100%; padding: 15px; border-radius: 10px; font-size: 18px;">
+        </div>
+
+        <div class="seccion-explorador">
+            <div class="ruta-actual">
+                <button id="btnVolverCarpeta" class="btn-atras" onclick="subirNivel()" style="display:none;">⬅ Atrás</button>
+                <span id="textoRuta">📁 Clientes</span>
+            </div>
+            <div id="contenidoExplorador" class="grid-carpetas"></div>
+            <div id="accionesContainer" class="acciones-container"></div>
+        </div>
+        
+        <button class="btn" style="background:#7f8c8d; font-size:20px; padding:15px; margin-top:25px; width:100%; border-radius:10px; border:none; color:white;" onclick="window.location.href='menu.html'">Volver al Menú Principal</button>
+    </div>
+
+    <script>
+        let todosLosDatos = [];
+        let nivelActual = "clientes"; 
+        let clienteSel = "", modeloSel = "", anoSel = "", mesSel = "";
+
+        // Traduce 2026-05-31 a 31-May-2026
+        function formatearFecha(fechaISO) {
+            if (!fechaISO) return "S/F";
+            const partes = fechaISO.split('-'); // ["2026", "05", "31"]
+            const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+            const indiceMes = parseInt(partes[1], 10) - 1;
+            return `${partes[2]}-${meses[indiceMes]}-${partes[0]}`;
+        }
+
+        // CORRECCIÓN 1: Enviamos el PIN guardado en la URL para que el servidor nos autorice
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const pinGuardado = localStorage.getItem('pinValidated') || localStorage.getItem('pinValidado'); 
+                
+                if (!pinGuardado) {
+                    alert("❌ No has iniciado sesión con un PIN válido.");
+                    window.location.href = "index.html";
+                    return;
+                }
+
+                // Le pasamos el PIN como parámetro query (?pin=xxxx)
+                const res = await fetch(`/obtener-clientes?pin=${pinGuardado}`);
+                todosLosDatos = await res.json();
+
+                // Si el backend nos mandó un objeto de error por seguridad
+                if (todosLosDatos.error) {
+                    alert(`❌ Error de acceso: ${todosLosDatos.error}`);
+                    window.location.href = "index.html";
+                    return;
+                }
+
+                mostrarClientes();
+            } catch (err) { 
+                console.error(err);
+                alert("Error al cargar datos desde el servidor."); 
+            }
+        });
+
+        function limpiarAcciones() { document.getElementById('accionesContainer').innerHTML = ""; }
+
+        function mostrarClientes() {
+            nivelActual = "clientes";
+            document.getElementById('btnVolverCarpeta').style.display = "none";
+            actualizarRutaClickeable([{ nombre: "Clientes", accion: null }]);
+            limpiarAcciones();
+            
+            const contenedor = document.getElementById('contenidoExplorador');
+            contenedor.innerHTML = "";
+            const clientes = [...new Set(todosLosDatos.map(d => d.cliente))];
+            
+            clientes.forEach(c => {
+                const div = crearItem("📁", c, () => { clienteSel = c; mostrarModelos(); });
+                contenedor.appendChild(div);
+            });
+        }
+
+        function mostrarModelos() {
+            nivelActual = "modelos";
+            document.getElementById('btnVolverCarpeta').style.display = "inline-block";
+            actualizarRutaClickeable([
+                { nombre: "Clientes", accion: () => mostrarClientes() },
+                { nombre: clienteSel, accion: null }
+            ]);
+            
+            const contenedor = document.getElementById('contenidoExplorador');
+            contenedor.innerHTML = "";
+            
+            const modelos = [...new Set(todosLosDatos.filter(d => d.cliente === clienteSel).map(d => d.vehiculo?.modelo || "Sin Modelo"))];
+            
+            modelos.forEach(m => {
+                const div = crearItem("🚗", m, () => { modeloSel = m; mostrarAnos(); });
+                contenedor.appendChild(div);
+            });
+
+            limpiarAcciones();
+            
+            if(localStorage.getItem('tipoUsuario') === 'admin') {
+                const btnCliente = document.createElement('button');
+                btnCliente.textContent = "🗑️ Eliminar CLIENTE COMPLETO (todos sus vehículos)";
+                btnCliente.style = "background:#c0392b; color:white; padding:12px; width:100%; border:none; border-radius:5px; font-weight:bold; cursor:pointer; margin-bottom:10px;";
+                btnCliente.onclick = () => eliminarClienteCompleto(clienteSel);
+                document.getElementById('accionesContainer').appendChild(btnCliente);
+                
+                const panelSeleccion = document.createElement('div');
+                panelSeleccion.style = "margin-top:15px; border-top:1px solid rgba(255,255,255,0.2); padding-top:15px;";
+                panelSeleccion.innerHTML = `
+                    <div style="color:#FF8533; font-weight:bold; margin-bottom:10px;">🔽 SELECCIONAR VEHÍCULOS A ELIMINAR:</div>
+                    <div id="listaCheckboxesVehiculos" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;"></div>
+                    <button id="btnEliminarSeleccionados" style="background:#e67e22; color:white; padding:10px; width:100%; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">🗑️ ELIMINAR VEHÍCULOS SELECCIONADOS</button>
+                `;
+                document.getElementById('accionesContainer').appendChild(panelSeleccion);
+                
+                const contenedorCheckboxes = document.getElementById('listaCheckboxesVehiculos');
+                const vehiculosCliente = [...new Set(todosLosDatos.filter(d => d.cliente === clienteSel).map(d => d.vehiculo?.modelo || "Sin Modelo"))];
+                
+                vehiculosCliente.forEach(modelo => {
+                    const label = document.createElement('label');
+                    label.style = "display:flex; align-items:center; gap:10px; color:white; cursor:pointer; padding:5px; background:rgba(255,255,255,0.05); border-radius:5px;";
+                    label.innerHTML = `
+                        <input type="checkbox" value="${modelo}" class="checkbox-vehiculo">
+                        <span>🚗 ${modelo}</span>
+                    `;
+                    contenedorCheckboxes.appendChild(label);
+                });
+                
+                document.getElementById('btnEliminarSeleccionados').onclick = () => {
+                    const checkboxes = document.querySelectorAll('.checkbox-vehiculo:checked');
+                    if(checkboxes.length === 0) {
+                        alert("❌ No has seleccionado ningún vehículo");
+                        return;
+                    }
+                    const modelosSeleccionados = Array.from(checkboxes).map(cb => cb.value);
+                    eliminarVehiculosSeleccionados(clienteSel, modelosSeleccionados);
+                };
+            }
+        }
+
+        function mostrarAnos() {
+            nivelActual = "anos";
+            actualizarRutaClickeable([
+                { nombre: "Clientes", accion: () => mostrarClientes() },
+                { nombre: clienteSel, accion: () => mostrarModelos() },
+                { nombre: modeloSel, accion: null }
+            ]);
+            limpiarAcciones();
+
+            const contenedor = document.getElementById('contenidoExplorador');
+            contenedor.innerHTML = "";
+            
+            const anos = [...new Set(todosLosDatos.filter(d => d.cliente === clienteSel && d.vehiculo?.modelo === modeloSel).map(d => d.fechaIngreso.split('-')[0]))];
+            
+            anos.forEach(a => {
+                const div = crearItem("📅", a, () => { anoSel = a; mostrarMeses(); });
+                contenedor.appendChild(div);
+            });
+        }
+
+        function mostrarMeses() {
+            nivelActual = "meses";
+            actualizarRutaClickeable([
+                { nombre: "Clientes", accion: () => mostrarClientes() },
+                { nombre: clienteSel, accion: () => mostrarModelos() },
+                { nombre: modeloSel, accion: () => mostrarAnos() },
+                { nombre: anoSel, accion: null }
+            ]);
+            limpiarAcciones();
+
+            const nombresMeses = {
+                "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
+                "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
+                "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
+            };
+
+            const contenedor = document.getElementById('contenidoExplorador');
+            contenedor.innerHTML = "";
+            const meses = [...new Set(todosLosDatos.filter(d => d.cliente === clienteSel && d.vehiculo?.modelo === modeloSel && d.fechaIngreso.startsWith(anoSel)).map(d => d.fechaIngreso.split('-')[1]))].sort();
+            
+            meses.forEach(m => {
+                const div = crearItem("📁", nombresMeses[m] || m, () => { mesSel = m; mostrarTrabajos(); });
+                contenedor.appendChild(div);
+            });
+        }
+
+        function mostrarTrabajos() {
+            nivelActual = "trabajos";
+            actualizarRutaClickeable([
+                { nombre: "Clientes", accion: () => mostrarClientes() },
+                { nombre: clienteSel, accion: () => mostrarModelos() },
+                { nombre: modeloSel, accion: () => mostrarAnos() },
+                { nombre: anoSel, accion: () => mostrarMeses() },
+                { nombre: mesSel, accion: null }
+            ]);
+            
+            const contenedor = document.getElementById('contenidoExplorador');
+            contenedor.innerHTML = "";
+            const trabajos = todosLosDatos.filter(d => d.cliente === clienteSel && d.vehiculo?.modelo === modeloSel && d.fechaIngreso.split('-')[1] === mesSel);
+            
+            trabajos.forEach(t => {
+                const fechaFormateada = formatearFecha(t.fechaIngreso);
+                const div = document.createElement('div');
+                div.className = "item-clicable";
+                div.innerHTML = `
+                    <div class="icono">📄</div>
+                    <div class="nombre-item">${fechaFormateada}<br><span style="font-size:12px; font-weight:normal;">${t.observaciones || "Servicio"}</span></div>
+                `;
+                div.onclick = () => { 
+                    localStorage.setItem('trabajoSeleccionado', JSON.stringify(t)); 
+                    window.location.href = "ver-trabajo.html"; 
+                };
+                
+                if(localStorage.getItem('tipoUsuario') === 'admin') {
+                    const btnEliminar = document.createElement('button');
+                    btnEliminar.textContent = "🗑️ Eliminar este trabajo";
+                    btnEliminar.style = "background:#e74c3c; color:white; border:none; border-radius:8px; padding:8px; margin-top:10px; cursor:pointer; font-size:12px; width:100%;";
+                    btnEliminar.onclick = (e) => {
+                        e.stopPropagation();
+                        if(confirm(`¿Eliminar trabajo del ${fechaFormateada}?`)) {
+                            eliminarTrabajoEspecifico(t._id);
+                        }
+                    };
+                    div.appendChild(btnEliminar);
+                }
+                
+                contenedor.appendChild(div);
+            });
+        }
+
+        function crearItem(icono, texto, accion) {
+            const div = document.createElement('div');
+            div.className = "item-clicable";
+            div.onclick = accion;
+            div.innerHTML = `<div class="icono">${icono}</div><div class="nombre-item">${texto}</div>`;
+            return div;
+        }
+
+        function subirNivel() {
+            if (nivelActual === "trabajos") mostrarMeses();
+            else if (nivelActual === "meses") mostrarAnos();
+            else if (nivelActual === "anos") mostrarModelos();
+            else if (nivelActual === "modelos") mostrarClientes();
+        }
+
+        function ejecutarBusqueda() {
+            const p = document.getElementById('buscadorJefe').value.toLowerCase();
+            const cont = document.getElementById('contenidoExplorador');
+            if (!p) return mostrarClientes();
+            cont.innerHTML = "";
+            const res = todosLosDatos.filter(d => d.cliente.toLowerCase().includes(p) || (d.vehiculo?.modelo || "").toLowerCase().includes(p) || (d.vehiculo?.placa || "").toLowerCase().includes(p));
+            res.forEach(t => {
+                const fechaF = formatearFecha(t.fechaIngreso);
+                const div = document.createElement('div');
+                div.className = "fila-resultado";
+                div.onclick = () => { localStorage.setItem('trabajoSeleccionado', JSON.stringify(t)); window.location.href = "ver-trabajo.html"; };
+                div.innerHTML = `<strong>👤 ${t.cliente}</strong><br><span style="color:#FF8533;">📅 ${fechaF} - 🚗 ${t.vehiculo?.modelo || 'S/M'}</span>`;
+                cont.appendChild(div);
+            });
+        }
+
+        // CORRECCIÓN 3: Tu backend elimina buscando la cédulaRuc del cliente, no el nombre. 
+        // Aquí localizamos la cédula del cliente seleccionado en el JSON antes de enviarla.
+        function eliminarCliente(nombre) {
+            if(!confirm(`¿Eliminar totalmente a "${nombre}"?`)) return;
+            
+            const registro = todosLosDatos.find(d => d.cliente === nombre);
+            const cedula = registro ? registro.cedulaRuc : null;
+
+            if(!cedula) {
+                alert("❌ No se encontró la cédula de este cliente.");
+                return;
+            }
+
+            fetch('/eliminar-cliente', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ cedulaRuc: cedula }) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert("✅ Cliente eliminado correctamente");
+                location.reload();
+            })
+            .catch(err => alert("❌ Error al eliminar"));
+        }
+
+        // Eliminar un trabajo específico (uno solo)
+        function eliminarTrabajoEspecifico(id) {
+            if(!confirm("⚠️ ¿Estás SEGURO? Esto eliminará SOLO este trabajo. Esta acción NO se puede deshacer.")) return;
+            
+            console.log("🔍 Eliminando trabajo con ID:", id);
+            
+            fetch('/eliminar-por-id', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("✅ Respuesta:", data);
+                alert("✅ Trabajo eliminado correctamente");
+                location.reload();
+            })
+            .catch(err => {
+                console.error("❌ Error:", err);
+                alert("❌ Error al eliminar el trabajo");
+            });
+        }
+        
+        // Eliminar vehículo completo (todos los trabajos de ese modelo para ese cliente)
+        function eliminarVehiculoCompleto(cliente, modelo) {
+            if(!confirm(`⚠️ ¿Eliminar TODOS los trabajos del vehículo "${modelo}" de ${cliente}? Esta acción NO se puede deshacer.`)) return;
+            
+            // Buscar todos los trabajos de ese cliente con ese modelo
+            const trabajosAEliminar = todosLosDatos.filter(d => d.cliente === cliente && d.vehiculo?.modelo === modelo);
+            
+            if(trabajosAEliminar.length === 0) {
+                alert("No se encontraron trabajos para este vehículo");
+                return;
+            }
+            
+            // Eliminar uno por uno
+            let eliminados = 0;
+            trabajosAEliminar.forEach(t => {
+                fetch('/eliminar-registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pinCliente: t.pinCliente, fechaIngreso: t.fechaIngreso })
+                })
+                .then(res => res.json())
+                .then(() => {
+                    eliminados++;
+                    if(eliminados === trabajosAEliminar.length) {
+                        alert(`✅ Se eliminaron ${eliminados} trabajo(s) del vehículo ${modelo}`);
+                        location.reload();
+                    }
+                })
+                .catch(err => console.error("Error eliminando:", err));
+            });
+        }
+
+        // Eliminar cliente COMPLETO (todos sus vehículos y trabajos)
+        function eliminarClienteCompleto(nombreCliente) {
+            if(!confirm(`⚠️ ¿ELIMINAR COMPLETAMENTE a "${nombreCliente}" y TODOS sus vehículos/trabajos? Esta acción NO se puede deshacer.`)) return;
+            
+            const registrosCliente = todosLosDatos.filter(d => d.cliente === nombreCliente);
+            const total = registrosCliente.length;
+            
+            if(total === 0) {
+                alert("No se encontraron registros");
+                return;
+            }
+            
+            let eliminados = 0;
+            registrosCliente.forEach(registro => {
+                fetch('/eliminar-registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        pinCliente: registro.pinCliente, 
+                        fechaIngreso: registro.fechaIngreso 
+                    })
+                })
+                .then(() => {
+                    eliminados++;
+                    if(eliminados === total) {
+                        alert(`✅ Se eliminaron ${eliminados} registro(s) del cliente ${nombreCliente}`);
+                        location.reload();
+                    }
+                })
+                .catch(err => console.error("Error:", err));
+            });
+        }
+
+        // Eliminar vehículos seleccionados (uno o varios)
+        function eliminarVehiculosSeleccionados(cliente, modelosAEliminar) {
+            if(!confirm(`⚠️ ¿Eliminar ${modelosAEliminar.length} vehículo(s) de ${cliente}? (${modelosAEliminar.join(", ")})\n\nEsta acción NO se puede deshacer.`)) return;
+            
+            // Buscar TODOS los registros de esos vehículos
+            const registrosAEliminar = todosLosDatos.filter(d => 
+                d.cliente === cliente && modelosAEliminar.includes(d.vehiculo?.modelo)
+            );
+            
+            if(registrosAEliminar.length === 0) {
+                alert("No se encontraron trabajos para estos vehículos");
+                return;
+            }
+            
+            let eliminados = 0;
+            registrosAEliminar.forEach(registro => {
+                fetch('/eliminar-registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        pinCliente: registro.pinCliente, 
+                        fechaIngreso: registro.fechaIngreso 
+                    })
+                })
+                .then(() => {
+                    eliminados++;
+                    if(eliminados === registrosAEliminar.length) {
+                        alert(`✅ Se eliminaron ${eliminados} trabajo(s) de ${modelosAEliminar.length} vehículo(s)`);
+                        location.reload();
+                    }
+                })
+                .catch(err => console.error("Error:", err));
+            });
+        }
+
+        // Función para mostrar ruta clickeable (como Windows)
+        function actualizarRutaClickeable(rutaItems) {
+            const contenedorRuta = document.getElementById('textoRuta');
+            contenedorRuta.innerHTML = "";
+            
+            rutaItems.forEach((item, index) => {
+                const span = document.createElement('span');
+                
+                if (index === 0) {
+                    span.textContent = `📁 ${item.nombre}`;
+                } else {
+                    span.textContent = ` / ${item.nombre}`;
+                }
+                
+                // Si tiene acción y no es el último, hacer clickeable
+                if (item.accion && index < rutaItems.length - 1) {
+                    span.style.cursor = "pointer";
+                    span.style.textDecoration = "underline";
+                    span.style.color = "#FF8533";
+                    span.style.fontWeight = "bold";
+                    span.style.padding = "4px 6px";
+                    span.style.borderRadius = "8px";
+                    span.style.transition = "background 0.2s";
+                    
+                    // Para móvil: feedback táctil
+                    span.ontouchstart = (e) => {
+                        e.stopPropagation();
+                        span.style.background = "rgba(255,133,51,0.3)";
+                    };
+                    span.onclick = (e) => {
+                        e.stopPropagation();
+                        item.accion();
+                    };
+                }
+                
+                contenedorRuta.appendChild(span);
+            });
+        }
+    </script>
+</body>
+</html>

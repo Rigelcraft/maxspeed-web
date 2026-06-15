@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Cliente - MaxSpeed</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        .contenedor-cliente {
+            width: 100%;
+            max-width: 450px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .logo-cabecera {
+            width: 300px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .titulo-seccion {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .formulario-limpio {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .campo label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .campo input, .campo textarea {
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .campo input:focus, .campo textarea:focus {
+            border-color: #333;
+            background-color: #fafafa;
+        }
+
+        .botones-grupo {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-principal {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .btn-principal:hover {
+            background-color: #000;
+        }
+
+        .btn-regresar-menu {
+            text-align: center;
+            color: #dc3545;
+            background-color: #fff5f5;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 12px;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-regresar-menu:hover {
+            color: white;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .divisor-seccion {
+            border: 0;
+            height: 2px;
+            background: #333;
+            margin: 30px 0 10px 0;
+            width: 100%;
+        }
+        
+        .titulo-subseccion {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+            text-align: center;
+        }
+        
+        .btn-accion {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 45px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-pequeno {
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-pequeno:hover {
+            background-color: #000;
+        }
+
+        .grupo-input-moderno {
+            display: flex;
+            align-items: center;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding-right: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .grupo-input-moderno select {
+            border: none;
+            background: transparent;
+            padding: 12px;
+            flex-grow: 1;
+            outline: none;
+            font-size: 1rem;
+        }
+        
+        .btn-invisible {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            padding: 5px;
+        }
+        
+        .btn-invisible:hover {
+            opacity: 1;
+        }
+
+        .fila-dinamica {
+            display: flex;
+            flex-direction: column; 
+            gap: 12px;            
+            width: 100%;          
+            margin-bottom: 15px;
+        }
+        
+        .input-trabajo, .input-repuesto, .input-precio, .input-descuento { 
+            width: 100% !important; 
+            box-sizing: border-box;
+        }
+        
+        .btn-eliminar-bloque {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;          
+            font-weight: bold;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-precio-obs {
+            width: 100% !important; 
+            box-sizing: border-box; 
+        }
+        
+        .campo textarea {
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-cliente">
+        <img src="logo.png" alt="MaxSpeed Logo" class="logo-cabecera">
+
+        <div class="titulo-seccion">Registro Vehicular</div>
+
+        <form class="formulario-limpio" onsubmit="event.preventDefault();">
+            
+            <div class="campo">
+                <label for="fecha-ingreso">FECHA DE INGRESO</label>
+                <input type="date" id="fecha-ingreso">
+            </div>
+            
+            <div class="campo">
+                <label for="fecha-salida">FECHA DE SALIDA</label>
+                <input type="date" id="fecha-salida">
+            </div>
+                                    
+            <div class="campo">
+                <label for="nombre">NOMBRE COMPLETO</label>
+                <input type="text" id="nombre" placeholder="Ej. Juan Pérez" list="lista-clientes">
+                <datalist id="lista-clientes"></datalist>
+            </div>
+
+            <div class="campo">
+                <label for="cedula">CÉDULA / RUC</label>
+                <input type="text" id="cedula" placeholder="0102030405...">
+            </div>
+
+            <div class="campo">
+                <label for="telefono">TELÉFONO</label>
+                <input type="tel" id="telefono" placeholder="098 765 4321">
+            </div>
+
+            <div class="campo">
+                <label for="direccion">DIRECCIÓN</label>
+                <input type="text" id="direccion" placeholder="Ej. Av. de las Américas">
+            </div>
+            
+            <div class="campo">
+                <label for="email">CORREO ELECTRÓNICO</label>
+                <input type="email" id="email" placeholder="ejemplo@correo.com">
+            </div>
+
+            <div class="campo">
+                <label for="pin-cliente">PIN DE ACCESO (CLIENTE) - 6 DÍGITOS</label>
+                <input type="text" id="pin-cliente" maxlength="6" readonly style="background-color:#fff3e0; font-weight:bold; color:#e65100;">
+            </div>
+
+            <hr class="divisor-seccion">
+            
+            <div class="titulo-subseccion">DATOS DEL VEHÍCULO</div>
+            
+            <div class="campo">
+                <label for="marca">MARCA DE VEHÍCULO</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="marca" list="lista-marcas" placeholder="Ej. Chevrolet" oninput="actualizarModelos()" style="flex: 1;">
+                    <button type="button" class="btn-pequeno">+</button>
+                </div>
+                <datalist id="lista-marcas">
+                    <option value="Chevrolet"><option value="Hyundai"><option value="Kia"><option value="Toyota"><option value="Chery"><option value="Great Wall"><option value="JAC"><option value="Jetour"><option value="Mazda"><option value="Nissan"><option value="Mitsubishi"><option value="Suzuki"><option value="Ford"><option value="Volkswagen"><option value="Renault"><option value="Hino">
+                </datalist>
+            </div>
+            
+            <div class="campo">
+                <label for="modelo">MODELO</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="modelo" list="lista-modelos" placeholder="Seleccione marca primero..." style="flex: 1;">
+                    <button type="button" class="btn-pequeno">+</button>
+                </div>
+                <datalist id="lista-modelos"></datalist>
+            </div>
+            
+            <div class="campo">
+                <label for="anio">AÑO</label>
+                <input type="number" id="anio" placeholder="Ej. 2024" min="1950" max="2030">
+            </div>
+            
+            <div class="campo">
+                <label for="color">COLOR</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="color" list="lista-colores" placeholder="Ej. Blanco, Plateado..." style="flex: 1;">
+                    <button type="button" class="btn-pequeno" onclick="document.getElementById('color').value=''; document.getElementById('color').focus();">+</button>
+                </div>
+                <datalist id="lista-colores">
+                    <option value="Blanco"><option value="Plateado (Gris)"><option value="Negro"><option value="Rojo"><option value="Azul"><option value="Dorado (Oro)"><option value="Vino / Burdeos"><option value="Verde"><option value="Beige / Crema"><option value="Café / Marrón"><option value="Naranja"><option value="Amarillo"><option value="Celeste"><option value="Plomo">
+                </datalist>
+            </div>
+                                    
+            <div class="campo">
+                <label for="placas">PLACA</label>
+                <input type="text" id="placas" placeholder="ABC-1234" maxlength="8" inputmode="text" style="text-transform: uppercase; font-weight: bold; letter-spacing: 2px;">
+            </div>
+            
+            <div class="campo">
+                <label>RESPONSABLE DEL TRABAJO</label>
+                <div class="grupo-input-moderno">
+                    <select id="responsable">
+                        <option value="Jaime Sarmiento">Jaime Sarmiento</option>
+                    </select>
+                    <button type="button" class="btn-invisible" onclick="agregarResponsable()">➕</button>
+                    <button type="button" class="btn-invisible" onclick="borrarResponsable()">🗑️</button>
+                </div>
+            </div>
+
+            <hr class="divisor-seccion">
+            <div class="titulo-subseccion">DETALLE DEL TRABAJO</div>
+            
+            <div class="campo" id="contenedor-trabajos">
+                <label>TRABAJOS REALIZADOS</label>
+                <div class="fila-dinamica">
+                    <input type="text" list="lista-trabajos" placeholder="Ej. Cambio de aceite" class="input-trabajo">
+                    <input type="number" placeholder="Precio $" class="input-precio" oninput="calcularTotal()">
+                    <button type="button" class="btn-pequeno" onclick="agregarFila('contenedor-trabajos', 'trabajo')">+</button>
+                </div>
+            </div>
+            
+            <datalist id="lista-trabajos">
+                <option value="Cambio de Aceite y Filtro de Motor">
+                <option value="Cambio de Aceite de Caja de Cambios (Manual/Automática)">
+                <option value="Cambio de Aceite de Diferencial">
+                <option value="Cambio de Filtro de Aire de Motor">
+                <option value="Cambio de Filtro de Aire de Cabina (A/C)">
+                <option value="Cambio de Filtro de Combustible">
+                <option value="ABC de Frenos (Limpieza y Regulación)">
+                <option value="Cambio de Pastillas de Freno">
+                <option value="Cambio de Discos de Freno">
+                <option value="Cambio de Zapatas / Tambores Traseros">
+                <option value="Rectificación de Discos / Tambores">
+                <option value="Cambio de Líquido de Frenos y Purga">
+                <option value="ABC de Motor (Afinamiento Completo)">
+                <option value="Limpieza y Calibración de Inyectores (Ultrasonido)">
+                <option value="Cambio de Bujías">
+                <option value="Limpieza de Cuerpo de Aceleración">
+                <option value="Cambio de Kit de Distribución (Banda/Cadena)">
+                <option value="Cambio de Banda de Accesorios (Alternador/Aire)">
+                <option value="Cambio de Empaque de Tapa de Válvulas">
+                <option value="Medición de Compresión del Motor">
+                <option value="Revisión y Ajuste de Suspensión">
+                <option value="Cambio de Amortiguadores (Delanteros/Traseros)">
+                <option value="Cambio de Mesas / Bocines de Suspensión">
+                <option value="Cambio de Terminales de Dirección / Rótulas">
+                <option value="Cambio de Rodamientos de Rueda (Rulimanes)">
+                <option value="Cambio de Juntas Homocinéticas / Lados">
+                <option value="Diagnóstico con Escáner Automotriz (Borrado de Códigos)">
+                <option value="Chequeo de Batería y Sistema de Carga">
+                <option value="Mantenimiento / Cambio de Alternador">
+                <option value="Mantenimiento / Cambio de Motor de Arranque">
+                <option value="Recarga de Gas de Aire Acondicionado">
+                <option value="Cambio de Focos / Luces del Sistema Eléctrico">
+            </datalist>
+            
+            <div class="campo" id="contenedor-repuestos" style="margin-top: 10px;">
+                <label>REPUESTOS UTILIZADOS</label>
+                <div class="fila-dinamica">
+                    <input type="text" list="lista-repuestos" placeholder="Ej. Filtro de aire" class="input-repuesto">
+                    <input type="number" placeholder="PVP $" class="input-precio" title="Precio al cliente" oninput="calcularTotal()">
+                    <input type="number" placeholder="Desc %" class="input-descuento" title="Descuento de distribuidora (Oculto al cliente)">
+                    <button type="button" class="btn-pequeno" onclick="agregarFila('contenedor-repuestos', 'repuesto')">+</button>
+                </div>
+            </div>
+                                
+            <datalist id="lista-repuestos">
+                <option value="Aceite de Motor 10W30 (Galón)">
+                <option value="Aceite de Motor 20W50 (Galón)">
+                <option value="Aceite de Motor 5W30 (Sintético)">
+                <option value="Aceite de Transmisión / Caja">
+                <option value="Líquido de Frenos DOT 4">
+                <option value="Líquido Refrigerante (Anticongelante)">
+                <option value="Filtro de Aceite de Motor">
+                <option value="Filtro de Aire de Motor">
+                <option value="Filtro de Combustible (Gasolina/Diésel)">
+                <option value="Filtro de Aire de Cabina (A/C)">
+                <option value="Bujías de Encendido (Juego)">
+                <option value="Pastillas de Freno Delanteras">
+                <option value="Pastillas de Freno Traseras">
+                <option value="Banda de Distribución">
+                <option value="Banda de Alternador">
+                <option value="Empaque de Tapa de Válvulas">
+                <option value="Silicona RTV / Empacadura Gris">
+                <option value="Limpia Carburador / Cuerpo Aceleración (Spray)">
+                <option value="Amortiguadores Delanteros (Par)">
+                <option value="Amortiguadores Traseros (Par)">
+                <option value="Rótulas de Suspensión">
+                <option value="Terminales de Dirección">
+                <option value="Batería Automotriz">
+                <option value="Focos de Faro Principal (H4/H7)">
+            </datalist>
+                                
+            <hr class="divisor-seccion">
+            
+            <div class="campo">
+                <label for="observaciones">OBSERVACIONES ADICIONALES</label>
+                <textarea id="observaciones" rows="3" placeholder="Ej. El cliente solicita revisar un ruido en la puerta..."></textarea>
+            </div>
+            
+            <div class="campo" style="margin-top: 10px;">
+                <label for="precio-observacion">PRECIO DE OBSERVACIÓN (OPCIONAL)</label>
+                <input type="number" id="precio-observacion" placeholder="Ej. 15.00" class="input-precio-obs" oninput="calcularTotal()">
+            </div>
+            
+            <div style="text-align: right; margin-top: 5px; font-weight: bold; color: #2e7d32; font-size: 1.1rem; padding-right: 5px;">
+                TOTAL A COBRAR: $<span id="total-final">0.00</span>
+            </div>
+                                    
+            <div class="botones-grupo">
+                <button type="button" class="btn-principal" onclick="procesarGuardado()">GUARDAR CLIENTE</button>
+                <a href="menu.html" class="btn-regresar-menu">❌ CANCELAR Y VOLVER AL MENÚ</a>
+            </div>
+        </form>
+    </div>
+
+<script>
+        // 1. FECHAS AUTOMÁTICAS
+        const inputIngreso = document.getElementById('fecha-ingreso');
+        const inputSalida = document.getElementById('fecha-salida');
+        const formatear = (fecha) => fecha.toISOString().split('T')[0];
+    
+        const hoy = new Date();
+        const ingreso = new Date();
+        ingreso.setDate(hoy.getDate() - 3); 
+    
+        inputIngreso.value = formatear(ingreso);
+        inputSalida.value = formatear(hoy);
+    
+        // 2. DICCIONARIO DE CARROS
+        const datosAutos = {
+            "Chevrolet": ["Sail", "D-Max", "Aveo", "Spark", "Captiva", "Tracker", "Cavalier", "N300", "Joy"],
+            "Hyundai": ["Tucson", "Santa Fe", "Creta", "Accent", "i10", "H-1", "Sonata", "Elantra"],
+            "Kia": ["Sportage", "Picanto", "Rio", "Soluto", "Seltos", "Cerato", "Stonic"],
+            "Toyota": ["Hilux", "Fortuner", "Corolla", "Yaris", "Rav4", "Prius", "Land Cruiser"],
+            "Chery": ["Tiggo 2", "Tiggo 4", "Tiggo 7", "Tiggo 8", "Arrizo"],
+            "Great Wall": ["Wingle 5", "Wingle 7", "Poer", "H6", "H2"],
+            "JAC": ["T6", "T8", "S2", "S3", "S4"],
+            "Jetour": ["X70", "X70 Plus", "X90"],
+            "Mazda": ["BT-50", "CX-5", "CX-30", "Mazda 3", "CX-9"],
+            "Nissan": ["Frontier", "Kicks", "Versa", "Sentra", "X-Trail", "Qashqai"],
+            "Mitsubishi": ["L200", "Montero", "Outlander", "ASX"],
+            "Suzuki": ["S-Cross", "Vitara", "Jimny", "Swift", "Gran Vitara"],
+            "Ford": ["F-150", "Ranger", "Explorer", "EcoSport", "Escape"],
+            "Volkswagen": ["Amarok", "T-Cross", "Gol", "Tiguan", "Virtus"],
+            "Renault": ["Duster", "Stepway", "Logan", "Kwid", "Sandero"],
+            "Hino": ["Dutro", "Serie 300", "Serie 500", "FC", "GD"]
+        };
+    
+        function actualizarModelos() {
+            const marcaSeleccionada = document.getElementById('marca').value;
+            const listaModelos = document.getElementById('lista-modelos');
+            const inputModelo = document.getElementById('modelo');
+    
+            listaModelos.innerHTML = "";
+    
+            if (datosAutos[marcaSeleccionada]) {
+                inputModelo.placeholder = "Escriba el modelo...";
+                datosAutos[marcaSeleccionada].forEach(modelo => {
+                    const opcion = document.createElement('option');
+                    opcion.value = modelo;
+                    listaModelos.appendChild(opcion);
+                });
+            } else {
+                inputModelo.placeholder = "Marca no reconocida...";
+            }
+        }
+    
+        // 3. RESPONSABLE Y PLACAS
+        const inputResponsable = document.getElementById('responsable');
+        inputResponsable.value = "Jaime Sarmiento";
+
+        const inputPlaca = document.getElementById('placas');
+        inputPlaca.addEventListener('input', function (e) {
+            if (e.inputType === 'deleteContentBackward') return; 
+        
+            let valor = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            let letras = valor.slice(0, 3).replace(/[^A-Z]/g, '');
+            let numeros = valor.slice(3).replace(/[^0-9]/g, '');
+        
+            let resultado = letras;
+            if (letras.length === 3) {
+                resultado += "-";
+                resultado += numeros;
+            }
+            e.target.value = resultado;
+        });
+
+        const selectResponsable = document.getElementById('responsable');
+        function agregarResponsable() {
+            const nuevoNombre = prompt("Escriba el nombre del nuevo responsable:");
+            if (nuevoNombre && nuevoNombre.trim() !== "") {
+                const nuevaOpcion = document.createElement('option');
+                nuevaOpcion.value = nuevoNombre.trim();
+                nuevaOpcion.textContent = nuevoNombre.trim();
+                selectResponsable.appendChild(nuevaOpcion);
+                selectResponsable.value = nuevoNombre.trim();
+            }
+        }
+        
+        function borrarResponsable() {
+            const nombreAEliminar = selectResponsable.value;
+            if (nombreAEliminar === "Jaime Sarmiento") {
+                alert("No se puede eliminar al responsable principal.");
+                return;
+            }
+            if (confirm(`¿Estás seguro de que quieres eliminar a "${nombreAEliminar}"?`)) {
+                selectResponsable.remove(selectResponsable.selectedIndex);
+            }
+        }
+
+        function agregarFila(contenedorId, tipo) {
+            const contenedor = document.getElementById(contenedorId);
+            const nuevaFila = document.createElement('div');
+            nuevaFila.className = 'fila-dinamica';
+
+            if (tipo === 'trabajo') {
+                nuevaFila.innerHTML = `
+                    <input type="text" list="lista-trabajos" placeholder="Otro trabajo..." class="input-trabajo">
+                    <input type="number" placeholder="Precio $" class="input-precio" oninput="calcularTotal()">
+                    <button type="button" class="btn-accion" onclick="this.parentElement.remove(); calcularTotal();">×</button>
+                `;
+            } else {
+                nuevaFila.innerHTML = `
+                    <input type="text" list="lista-repuestos" placeholder="Otro repuesto..." class="input-repuesto">
+                    <input type="number" placeholder="PVP $" class="input-precio" oninput="calcularTotal()">
+                    <input type="number" placeholder="Desc %" class="input-descuento">
+                    <button type="button" class="btn-accion" onclick="this.parentElement.remove(); calcularTotal();">×</button>
+                `;
+            }
+            contenedor.appendChild(nuevaFila);
+        }
+
+        function calcularTotal() {
+            let total = 0;
+            const precios = document.querySelectorAll('.input-precio');
+            precios.forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+
+            const precioObs = parseFloat(document.getElementById('precio-observacion').value) || 0;
+            total += precioObs;
+        
+            document.getElementById('total-final').textContent = total.toFixed(2);
+        }
+
+        // PIN de EXACTAMENTE 6 dígitos
+        function generarPinAleatorio() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Función para verificar si un PIN ya existe en la BD (evitar duplicados)
+        async function pinExiste(pin) {
+            try {
+                const response = await fetch(`/verificar-pin?pin=${pin}`);
+                const data = await response.json();
+                return data.existe;
+            } catch (error) {
+                console.error("Error verificando PIN:", error);
+                return false;
+            }
+        }
+
+        // Generar PIN único de 6 dígitos
+        async function generarPinUnico() {
+            let nuevoPin = generarPinAleatorio();
+            let contador = 0;
+            while (await pinExiste(nuevoPin) && contador < 50) {
+                nuevoPin = generarPinAleatorio();
+                contador++;
+            }
+            return nuevoPin;
+        }
+
+        // Cargar clientes existentes y determinar si es nuevo o no
+        let clienteExistenteCompleto = null;
+        let listaClientesGlobal = [];
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Cargar lista de clientes
+            try {
+                const respuesta = await fetch('/obtener-clientes');
+                const clientes = await respuesta.json();
+                listaClientesGlobal = clientes;
+                const datalist = document.getElementById('lista-clientes');
+                datalist.innerHTML = "";
+                const nombresUnicos = [...new Set(clientes.map(c => c.cliente))];
+                nombresUnicos.forEach(nombre => {
+                    const opcion = document.createElement('option');
+                    opcion.value = nombre;
+                    datalist.appendChild(opcion);
+                });
+            } catch (err) {
+                console.error("Error cargando clientes:", err);
+            }
+            
+            // Generar PIN solo si no hay cliente seleccionado
+            const pinInput = document.getElementById('pin-cliente');
+            pinInput.value = await generarPinUnico();
+        });
+
+        // Autorelleno al seleccionar nombre
+        document.getElementById('nombre').addEventListener('input', async (e) => {
+            const nombreIngresado = e.target.value;
+            const clienteEncontrado = listaClientesGlobal.find(c => c.cliente === nombreIngresado);
+
+            if (clienteEncontrado) {
+                clienteExistenteCompleto = clienteEncontrado;
+                // Rellenar datos del cliente
+                if(document.getElementById('cedula')) document.getElementById('cedula').value = clienteEncontrado.cedulaRuc || '';
+                if(document.getElementById('telefono')) document.getElementById('telefono').value = clienteEncontrado.telefono || '';
+                if(document.getElementById('direccion')) document.getElementById('direccion').value = clienteEncontrado.direccion || '';
+                if(document.getElementById('email')) document.getElementById('email').value = clienteEncontrado.email || '';
+                
+                // Rellenar datos del vehículo
+                if(clienteEncontrado.vehiculo) {
+                    if(document.getElementById('marca')) {
+                        document.getElementById('marca').value = clienteEncontrado.vehiculo.marca || '';
+                        actualizarModelos(); 
+                    }
+                    if(document.getElementById('modelo')) document.getElementById('modelo').value = clienteEncontrado.vehiculo.modelo || '';
+                    if(document.getElementById('anio')) document.getElementById('anio').value = clienteEncontrado.vehiculo.anio || '';
+                    if(document.getElementById('color')) document.getElementById('color').value = clienteEncontrado.vehiculo.color || '';
+                    if(document.getElementById('placas')) document.getElementById('placas').value = clienteEncontrado.vehiculo.placa || '';
+                }
+                
+                // MANTENER EL PIN EXISTENTE del cliente
+                if(clienteEncontrado.pinCliente) {
+                    document.getElementById('pin-cliente').value = clienteEncontrado.pinCliente;
+                }
+            } else {
+                clienteExistenteCompleto = null;
+                // Si es nuevo cliente, generar PIN nuevo
+                const nuevoPin = await generarPinUnico();
+                document.getElementById('pin-cliente').value = nuevoPin;
+            }
+        });
+
+        function procesarGuardado() {
+            const nombreCliente = document.getElementById('nombre').value.trim();
+            const placaVehiculo = document.getElementById('placas').value.trim();
+
+            if (nombreCliente === "") {
+                alert("❌ El nombre del cliente es obligatorio.");
+                document.getElementById('nombre').focus();
+                return;
+            }
+            if (placaVehiculo.length < 7) { 
+                alert("❌ La placa del vehículo está incompleta.");
+                document.getElementById('placas').focus();
+                return;
+            }
+
+            const trabajos = Array.from(document.querySelectorAll('#contenedor-trabajos .fila-dinamica')).map(fila => ({
+                descripcion: fila.querySelector('.input-trabajo').value,
+                precio: fila.querySelector('.input-precio').value
+            }));
+
+            const repuestos = Array.from(document.querySelectorAll('#contenedor-repuestos .fila-dinamica')).map(fila => ({
+                descripcion: fila.querySelector('.input-repuesto').value,
+                pvp: fila.querySelector('.input-precio').value,
+                descuento: fila.querySelector('.input-descuento').value
+            }));
+
+            const registroCompleto = {
+                pinCliente: document.getElementById('pin-cliente').value,
+                fechaIngreso: document.getElementById('fecha-ingreso').value,
+                fechaSalida: document.getElementById('fecha-salida').value,
+                cliente: nombreCliente,
+                cedulaRuc: document.getElementById('cedula').value,
+                telefono: document.getElementById('telefono').value,
+                direccion: document.getElementById('direccion').value,
+                email: document.getElementById('email').value,
+                vehiculo: {
+                    marca: document.getElementById('marca').value,
+                    modelo: document.getElementById('modelo').value,
+                    anio: document.getElementById('anio').value,
+                    color: document.getElementById('color').value,
+                    placa: placaVehiculo
+                },
+                responsable: document.getElementById('responsable').value,
+                trabajos: trabajos,
+                repuestos: repuestos,
+                observacionesAdicionales: document.getElementById('observaciones').value,
+                precioObservacion: document.getElementById('precio-observacion').value,
+                total: document.getElementById('total-final').textContent
+            };
+
+            fetch('/guardar-cliente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(registroCompleto) 
+            })
+            .then(respuesta => respuesta.json())
+            .then(data => {
+                alert("🎉 " + data.mensaje);
+                window.location.href = "explorador.html";  // ← REDIRIGE AL EXPLORADOR
+            })
+            .catch(error => {
+                console.error("Error al enviar los datos:", error);
+                alert("❌ Hubo un error al guardar.");
+            });
+        }
+    </script>
+</body>
+</html>

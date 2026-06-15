@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Registro - MaxSpeed</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        .contenedor-cliente {
+            width: 100%;
+            max-width: 450px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .logo-cabecera {
+            width: 300px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .titulo-seccion {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .formulario-limpio {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .campo label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .campo input, .campo textarea, .grupo-input-moderno select {
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        /* Estilos de protección para Vista de Espectador */
+        .campo input[readonly], .campo textarea[readonly], .grupo-input-moderno select[disabled] {
+            background-color: #f4f4f4 !important;
+            color: #555 !important;
+            border-color: #ddd !important;
+            cursor: not-allowed;
+        }
+
+        /* Iluminación enfocada en modo edición activa */
+        .campo input:not([readonly]):focus, .campo textarea:not([readonly]):focus {
+            border-color: #FF8533 !important;
+            background-color: #fafafa;
+        }
+
+        .botones-grupo {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-principal {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .btn-principal:hover {
+            background-color: #000;
+        }
+
+        .btn-editar {
+            background-color: #FF8533 !important;
+        }
+        .btn-editar:hover {
+            background-color: #e06c20 !important;
+        }
+
+        .btn-secundario {
+            text-align: center;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+
+        .btn-secundario:hover {
+            color: #333;
+        }
+
+        .divisor-seccion {
+            border: 0;
+            height: 2px;
+            background: #333;
+            margin: 30px 0 10px 0;
+            width: 100%;
+        }
+        
+        .titulo-subseccion {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+            text-align: center;
+        }
+        
+        .btn-accion {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 45px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-pequeno {
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-pequeno:hover {
+            background-color: #000;
+        }
+
+        .grupo-input-moderno {
+            display: flex;
+            align-items: center;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding-right: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .grupo-input-moderno select {
+            border: none;
+            background: transparent;
+            padding: 12px;
+            flex-grow: 1;
+            outline: none;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .btn-invisible {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            padding: 5px;
+        }
+        
+        .btn-invisible:hover {
+            opacity: 1;
+        }
+
+        .fila-dinamica {
+            display: flex;
+            flex-direction: column; 
+            gap: 12px;             
+            width: 100%;           
+            margin-bottom: 15px;
+        }
+        
+        .input-trabajo, .input-repuesto, .input-precio, .input-descuento { 
+            width: 100% !important; 
+            box-sizing: border-box;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-precio-obs {
+            width: 100% !important; 
+            box-sizing: border-box; 
+        }
+        
+        .campo textarea {
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        /* Contenedor de botones dinámicos ocultos al inicio */
+        .controles-edicion-dinamica {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-cliente">
+        <img src="logo.png" alt="MaxSpeed Logo" class="logo-cabecera">
+
+        <div class="titulo-seccion" id="vista-titulo">Detalle de Registro</div>
+
+        <form class="formulario-limpio" onsubmit="event.preventDefault();">
+            
+            <div class="campo">
+                <label for="fecha-ingreso">FECHA DE INGRESO</label>
+                <input type="date" id="fecha-ingreso" readonly>
+            </div>
+            
+            <div class="campo">
+                <label for="fecha-salida">FECHA DE SALIDA</label>
+                <input type="date" id="fecha-salida" readonly>
+            </div>
+                                
+            <div class="campo">
+                <label for="nombre">NOMBRE COMPLETO</label>
+                <input type="text" id="nombre" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="pin-cliente">PIN DE ACCESO (ADMIN)</label>
+                <input type="text" id="pin-cliente" readonly style="font-weight: bold; background-color: #fff3e0 !important; color: #e65100 !important; border: 1px solid #e65100 !important;">
+            </div>
+
+            <div class="campo">
+                <label for="cedula">CÉDULA / RUC</label>
+                <input type="text" id="cedula" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="telefono">TELÉFONO</label>
+                <input type="tel" id="telefono" readonly>
+            </div>
+
+            <div class="campo">
+                <label for="direccion">DIRECCIÓN</label>
+                <input type="text" id="direccion" readonly>
+            </div>
+            
+            <div class="campo">
+                <label for="email">CORREO ELECTRÓNICO</label>
+                <input type="email" id="email" readonly>
+            </div>
+
+            <hr class="divisor-seccion">
+            
+            <div class="titulo-subseccion">DATOS DEL VEHÍCULO</div>
+            
+            <div class="campo">
+                <label for="marca">MARCA DE VEHÍCULO</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="marca" list="lista-marcas" oninput="actualizarModelos()" style="flex: 1;" readonly>
+                    <button type="button" class="btn-pequeno controles-edicion-dinamica">+</button>
+                </div>
+                <datalist id="lista-marcas">
+                    <option value="Chevrolet"><option value="Hyundai"><option value="Kia"><option value="Toyota"><option value="Chery"><option value="Great Wall"><option value="JAC"><option value="Jetour"><option value="Mazda"><option value="Nissan"><option value="Mitsubishi"><option value="Suzuki"><option value="Ford"><option value="Volkswagen"><option value="Renault"><option value="Hino">
+                </datalist>
+            </div>
+            
+            <div class="campo">
+                <label for="modelo">MODELO</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="modelo" list="lista-modelos" style="flex: 1;" readonly>
+                    <button type="button" class="btn-pequeno controles-edicion-dinamica">+</button>
+                </div>
+                <datalist id="lista-modelos"></datalist>
+            </div>
+            
+            <div class="campo">
+                <label for="anio">AÑO</label>
+                <input type="number" id="anio" min="1950" max="2030" readonly>
+            </div>
+            
+            <div class="campo">
+                <label for="color">COLOR</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="color" list="lista-colores" style="flex: 1;" readonly>
+                    <button type="button" class="btn-pequeno controles-edicion-dinamica" onclick="document.getElementById('color').value=''; document.getElementById('color').focus();">+</button>
+                </div>
+                <datalist id="lista-colores">
+                    <option value="Blanco"><option value="Plateado (Gris)"><option value="Negro"><option value="Rojo"><option value="Azul"><option value="Dorado (Oro)"><option value="Vino / Burdeos"><option value="Verde"><option value="Beige / Crema"><option value="Café / Marrón"><option value="Naranja"><option value="Amarillo"><option value="Celeste"><option value="Plomo">
+                </datalist>
+            </div>
+                                
+            <div class="campo">
+                <label for="placas">PLACA</label>
+                <input type="text" id="placas" maxlength="8" style="text-transform: uppercase; font-weight: bold; letter-spacing: 2px;" readonly>
+            </div>
+            
+            <div class="campo">
+                <label>RESPONSABLE DEL TRABAJO</label>
+                <div class="grupo-input-moderno">
+                    <select id="responsable" disabled>
+                        <option value="Jaime Sarmiento">Jaime Sarmiento</option>
+                    </select>
+                    <button type="button" class="btn-invisible controles-edicion-dinamica" onclick="agregarResponsable()">➕</button>
+                    <button type="button" class="btn-invisible controles-edicion-dinamica" onclick="borrarResponsable()">🗑️</button>
+                </div>
+            </div>
+
+            <hr class="divisor-seccion">
+            <div class="titulo-subseccion">DETALLE DEL TRABAJO</div>
+            
+            <div class="campo" id="contenedor-trabajos">
+                <label>TRABAJOS REALIZADOS</label>
+            </div>
+            
+            <datalist id="lista-trabajos">
+                <option value="Cambio de Aceite y Filtro de Motor">
+                <option value="Cambio de Aceite de Caja de Cambios (Manual/Automática)">
+                <option value="Cambio de Aceite de Diferencial">
+                <option value="Cambio de Filtro de Aire de Motor">
+                <option value="Cambio de Filtro de Aire de Cabina (A/C)">
+                <option value="Cambio de Filtro de Combustible">
+                <option value="ABC de Frenos (Limpieza y Regulación)">
+                <option value="Cambio de Pastillas de Freno">
+                <option value="Cambio de Discos de Freno">
+                <option value="Cambio de Zapatas / Tambores Traseros">
+                <option value="Rectificación de Discos / Tambores">
+                <option value="Cambio de Líquido de Frenos y Purga">
+                <option value="ABC de Motor (Afinamiento Completo)">
+                <option value="Limpieza y Calibración de Inyectores (Ultrasonido)">
+                <option value="Cambio de Bujías">
+                <option value="Limpieza de Cuerpo de Aceleración">
+                <option value="Cambio de Kit de Distribución (Banda/Cadena)">
+                <option value="Cambio de Banda de Accesorios (Alternador/Aire)">
+                <option value="Cambio de Empaque de Tapa de Válvulas">
+                <option value="Medición de Compresión del Motor">
+                <option value="Revisión y Ajuste de Suspensión">
+                <option value="Cambio de Amortiguadores (Delanteros/Traseros)">
+                <option value="Cambio de Mesas / Bocines de Suspensión">
+                <option value="Cambio de Terminales de Dirección / Rótulas">
+                <option value="Cambio de Rodamientos de Rueda (Rulimanes)">
+                <option value="Cambio de Juntas Homocinéticas / Lados">
+                <option value="Diagnóstico con Escáner Automotriz (Borrado de Códigos)">
+                <option value="Chequeo de Batería y Sistema de Carga">
+                <option value="Mantenimiento / Cambio de Alternador">
+                <option value="Mantenimiento / Cambio de Motor de Arranque">
+                <option value="Recarga de Gas de Aire Acondicionado">
+                <option value="Cambio de Focos / Luces del Sistema Eléctrico">
+            </datalist>
+            
+            <div class="campo" id="contenedor-repuestos" style="margin-top: 10px;">
+                <label>REPUESTOS UTILIZADOS</label>
+            </div>
+            
+            <datalist id="lista-repuestos">
+                <option value="Aceite de Motor 10W30 (Galón)">
+                <option value="Aceite de Motor 20W50 (Galón)">
+                <option value="Aceite de Motor 5W30 (Sintético)">
+                <option value="Aceite de Transmisión / Caja">
+                <option value="Líquido de Frenos DOT 4">
+                <option value="Líquido Refrigerante (Anticongelante)">
+                <option value="Filtro de Aceite de Motor">
+                <option value="Filtro de Aire de Motor">
+                <option value="Filtro de Combustible (Gasolina/Diésel)">
+                <option value="Filtro de Aire de Cabina (A/C)">
+                <option value="Bujías de Encendido (Juego)">
+                <option value="Pastillas de Freno Delanteras">
+                <option value="Pastillas de Freno Traseras">
+                <option value="Banda de Distribución">
+                <option value="Banda de Alternador">
+                <option value="Empaque de Tapa de Válvulas">
+                <option value="Silicona RTV / Empacadura Gris">
+                <option value="Limpia Carburador / Cuerpo Aceleración (Spray)">
+                <option value="Amortiguadores Delanteros (Par)">
+                <option value="Amortiguadores Traseros (Par)">
+                <option value="Rótulas de Suspensión">
+                <option value="Terminales de Dirección">
+                <option value="Batería Automotriz">
+                <option value="Focos de Faro Principal (H4/H7)">
+            </datalist>
+                        
+            <hr class="divisor-seccion">
+            
+            <div class="campo">
+                <label for="observaciones">OBSERVACIONES ADICIONALES</label>
+                <textarea id="observaciones" rows="3" readonly></textarea>
+            </div>
+            
+            <div class="campo" style="margin-top: 10px;">
+                <label for="precio-observacion">PRECIO DE OBSERVACIÓN (OPCIONAL)</label>
+                <input type="number" id="precio-observacion" class="input-precio-obs" oninput="calcularTotal()" readonly>
+            </div>
+            
+            <div style="text-align: right; margin-top: 5px; font-weight: bold; color: #2e7d32; font-size: 1.1rem; padding-right: 5px;">
+                TOTAL COBRADO: $<span id="total-final">0.00</span>
+            </div>
+                                
+            <div class="botones-grupo">
+                <button type="button" id="btnAccionPrincipal" class="btn-principal btn-editar" onclick="activarEdicionModo()">🔓 EDITAR REGISTRO</button>
+                <button type="button" id="btnEliminarRegistro" class="btn-principal" style="background-color:#e74c3c; display:none;" onclick="eliminarEsteRegistro()">🗑️ ELIMINAR ESTE REGISTRO</button>
+                <a href="explorador.html" class="btn-secundario">VOLVER AL EXPLORADOR</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let trabajoActual = null;
+        let modoEdicion = false;
+
+        // REGLA DE ORO DE CAPTURA: Detectamos si entró un cliente o papá
+        const tipoUsuario = localStorage.getItem('tipoUsuario') || 'cliente';
+
+        const datosAutos = {
+            "Chevrolet": ["Sail", "D-Max", "Aveo", "Spark", "Captiva", "Tracker", "Cavalier", "N300", "Joy"],
+            "Hyundai": ["Tucson", "Santa Fe", "Creta", "Accent", "i10", "H-1", "Sonata", "Elantra"],
+            "Kia": ["Sportage", "Picanto", "Rio", "Soluto", "Seltos", "Cerato", "Stonic"],
+            "Toyota": ["Hilux", "Fortuner", "Corolla", "Yaris", "Rav4", "Prius", "Land Cruiser"],
+            "Chery": ["Tiggo 2", "Tiggo 4", "Tiggo 7", "Tiggo 8", "Arrizo"],
+            "Great Wall": ["Wingle 5", "Wingle 7", "Poer", "H6", "H2"],
+            "JAC": ["T6", "T8", "S2", "S3", "S4"],
+            "Jetour": ["X70", "X70 Plus", "X90"],
+            "Mazda": ["BT-50", "CX-5", "CX-30", "Mazda 3", "CX-9"],
+            "Nissan": ["Frontier", "Kicks", "Versa", "Sentra", "X-Trail", "Qashqai"],
+            "Mitsubishi": ["L200", "Montero", "Outlander", "ASX"],
+            "Suzuki": ["S-Cross", "Vitara", "Jimny", "Swift", "Gran Vitara"],
+            "Ford": ["F-150", "Ranger", "Explorer", "EcoSport", "Escape"],
+            "Volkswagen": ["Amarok", "T-Cross", "Gol", "Tiguan", "Virtus"],
+            "Renault": ["Duster", "Stepway", "Logan", "Kwid", "Sandero"],
+            "Hino": ["Dutro", "Serie 300", "Serie 500", "FC", "GD"]
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const datosTemporales = localStorage.getItem('trabajoSeleccionado');
+            
+            if (!datosTemporales) {
+                alert("No se seleccionó ningún trabajo válido.");
+                window.location.href = "explorador.html";
+                return;
+            }
+
+            trabajoActual = JSON.parse(datosTemporales);
+            
+            // Mostrar botón de eliminar solo si es admin
+            if (tipoUsuario === 'admin') {
+                const btnEliminar = document.getElementById('btnEliminarRegistro');
+                if (btnEliminar) btnEliminar.style.display = 'block';
+            }
+            
+            // Si es cliente, ocultamos el botón de editar
+            if (tipoUsuario === 'cliente') {
+                const btnEditar = document.getElementById('btnAccionPrincipal');
+                if (btnEditar) btnEditar.style.display = 'none';
+            }
+
+            rellenarFormularioEstatico();
+        });
+
+        function rellenarFormularioEstatico() {
+            document.getElementById('fecha-ingreso').value = trabajoActual.fechaIngreso || '';
+            document.getElementById('fecha-salida').value = trabajoActual.fechaSalida || '';
+            document.getElementById('nombre').value = trabajoActual.cliente || '';
+            document.getElementById('pin-cliente').value = trabajoActual.pinCliente || 'Sin PIN';
+            document.getElementById('cedula').value = trabajoActual.cedulaRuc || '';
+            document.getElementById('telefono').value = trabajoActual.telefono || '';
+            document.getElementById('direccion').value = trabajoActual.direccion || '';
+            document.getElementById('email').value = trabajoActual.email || '';
+            
+            if(trabajoActual.vehiculo) {
+                document.getElementById('marca').value = trabajoActual.vehiculo.marca || '';
+                actualizarModelos();
+                document.getElementById('modelo').value = trabajoActual.vehiculo.modelo || '';
+                document.getElementById('anio').value = trabajoActual.vehiculo.anio || '';
+                document.getElementById('color').value = trabajoActual.vehiculo.color || '';
+                document.getElementById('placas').value = trabajoActual.vehiculo.placa || '';
+            }
+
+            const selectResp = document.getElementById('responsable');
+            if (trabajoActual.responsable) {
+                let existeOp = Array.from(selectResp.options).some(opt => opt.value === trabajoActual.responsable);
+                if (!existeOp) {
+                    const opt = document.createElement('option');
+                    opt.value = trabajoActual.responsable;
+                    opt.textContent = trabajoActual.responsable;
+                    selectResp.appendChild(opt);
+                }
+                selectResp.value = trabajoActual.responsable;
+            }
+
+            const contTrabajos = document.getElementById('contenedor-trabajos');
+            if(trabajoActual.trabajos && trabajoActual.trabajos.length > 0) {
+                trabajoActual.trabajos.forEach((t, index) => {
+                    inyectarFilaLectura(contTrabajos, 'trabajo', t.descripcion, t.precio, index === 0);
+                });
+            } else {
+                inyectarFilaLectura(contTrabajos, 'trabajo', trabajoActual.observaciones || 'Servicio Técnico', trabajoActual.total || 0, true);
+            }
+
+            const contRepuestos = document.getElementById('contenedor-repuestos');
+            if(trabajoActual.repuestos && trabajoActual.repuestos.length > 0) {
+                trabajoActual.repuestos.forEach((r, index) => {
+                    inyectarFilaLectura(contRepuestos, 'repuesto', r.descripcion, r.pvp, index === 0, r.descuento);
+                });
+            } else {
+                inyectarFilaLectura(contRepuestos, 'repuesto', '', '', true);
+            }
+
+            document.getElementById('observaciones').value = trabajoActual.observacionesAdicionales || '';
+            document.getElementById('precio-observacion').value = trabajoActual.precioObservacion || '';
+            document.getElementById('total-final').textContent = parseFloat(trabajoActual.total || 0).toFixed(2);
+        }
+
+        function inyectarFilaLectura(contenedor, tipo, desc, precio, esPrimera, descPorcentaje = '') {
+            const div = document.createElement('div');
+            div.className = 'fila-dinamica';
+            
+            let btnHtml = esPrimera 
+                ? `<button type="button" class="btn-pequeno controles-edicion-dinamica" onclick="agregarFilaClon('${contenedor.id}', '${tipo}')">+</button>`
+                : `<button type="button" class="btn-accion controles-edicion-dinamica" onclick="this.parentElement.remove(); calcularTotal();">×</button>`;
+
+            if (tipo === 'trabajo') {
+                div.innerHTML = `
+                    <input type="text" list="lista-trabajos" value="${desc.replace(/"/g, '&quot;')}" placeholder="Trabajo..." class="input-trabajo" readonly>
+                    <input type="number" value="${precio}" placeholder="Precio $" class="input-precio" oninput="calcularTotal()" readonly>
+                    ${btnHtml}
+                `;
+            } else {
+                let estiloDescuento = (tipoUsuario === 'cliente') ? 'display: none !important;' : '';
+                div.innerHTML = `
+                    <input type="text" list="lista-repuestos" value="${desc.replace(/"/g, '&quot;')}" placeholder="Repuesto..." class="input-repuesto" readonly>
+                    <input type="number" value="${precio}" placeholder="PVP $" class="input-precio" oninput="calcularTotal()" readonly>
+                    <input type="number" value="${descPorcentaje || ''}" placeholder="Desc %" class="input-descuento" style="${estiloDescuento}" readonly>
+                    ${btnHtml}
+                `;
+            }
+            contenedor.appendChild(div);
+        }
+
+        function actualizarModelos() {
+            const marcaSeleccionada = document.getElementById('marca').value;
+            const listaModelos = document.getElementById('lista-modelos');
+            listaModelos.innerHTML = "";
+            if (datosAutos[marcaSeleccionada]) {
+                datosAutos[marcaSeleccionada].forEach(modelo => {
+                    const opcion = document.createElement('option');
+                    opcion.value = modelo;
+                    listaModelos.appendChild(opcion);
+                });
+            }
+        }
+
+        function activarEdicionModo() {
+            if(tipoUsuario === 'cliente') return;
+
+            modoEdicion = true;
+            document.getElementById('vista-titulo').textContent = "Modificar Registro Vehicular";
+            document.getElementById('pin-cliente').removeAttribute('readonly');
+            
+            const inputs = document.querySelectorAll('.formulario-limpio input, .formulario-limpio textarea');
+            inputs.forEach(inp => inp.removeAttribute('readonly'));
+            
+            document.getElementById('responsable').removeAttribute('disabled');
+
+            const controlesOcultos = document.querySelectorAll('.controles-edicion-dinamica');
+            controlesOcultos.forEach(control => control.style.display = 'flex');
+
+            const btn = document.getElementById('btnAccionPrincipal');
+            btn.textContent = "💾 GUARDAR CAMBIOS";
+            btn.classList.remove('btn-editar');
+            btn.setAttribute('onclick', 'procesarActualizacion()');
+        }
+
+        function agregarFilaClon(contenedorId, tipo) {
+            const contenedor = document.getElementById(contenedorId);
+            const nuevaFila = document.createElement('div');
+            nuevaFila.className = 'fila-dinamica';
+
+            if (tipo === 'trabajo') {
+                nuevaFila.innerHTML = `
+                    <input type="text" list="lista-trabajos" placeholder="Otro trabajo..." class="input-trabajo">
+                    <input type="number" placeholder="Precio $" class="input-precio" oninput="calcularTotal()">
+                    <button type="button" class="btn-accion" onclick="this.parentElement.remove(); calcularTotal();">×</button>
+                `;
+            } else {
+                let estiloDescuento = (tipoUsuario === 'cliente') ? 'display: none !important;' : '';
+                nuevaFila.innerHTML = `
+                    <input type="text" list="lista-repuestos" placeholder="Otro repuesto..." class="input-repuesto">
+                    <input type="number" placeholder="PVP $" class="input-precio" oninput="calcularTotal()">
+                    <input type="number" placeholder="Desc %" class="input-descuento" style="${estiloDescuento}">
+                    <button type="button" class="btn-accion" onclick="this.parentElement.remove(); calcularTotal();">×</button>
+                `;
+            }
+            contenedor.appendChild(nuevaFila);
+        }
+
+        function calcularTotal() {
+            let total = 0;
+            const precios = document.querySelectorAll('.input-precio');
+            precios.forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            const precioObs = parseFloat(document.getElementById('precio-observacion').value) || 0;
+            total += precioObs;
+            document.getElementById('total-final').textContent = total.toFixed(2);
+        }
+
+        function procesarActualizacion() {
+            const datosParaActualizar = {
+                cedulaRuc: document.getElementById('cedula').value,
+                nuevoPin: document.getElementById('pin-cliente').value 
+            };
+
+            fetch('/actualizar-pin-masivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosParaActualizar)
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert("✅ " + data.mensaje);
+                window.location.href = "explorador.html";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("❌ Error al guardar");
+            });
+        }
+
+        function eliminarEsteRegistro() {
+            if(!confirm("⚠️ ¿Estás SEGURO? Esto eliminará PERMANENTEMENTE este registro completo. No se puede deshacer.")) return;
+            
+            console.log("Eliminando:", trabajoActual.pinCliente, trabajoActual.fechaIngreso);
+            
+            fetch('/eliminar-registro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    pinCliente: trabajoActual.pinCliente, 
+                    fechaIngreso: trabajoActual.fechaIngreso 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert("✅ Registro eliminado correctamente");
+                window.location.href = "explorador.html";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("❌ Error al eliminar el registro");
+            });
+        }
+
+        // Evento para formatear placa
+        const inputPlaca = document.getElementById('placas');
+        if (inputPlaca) {
+            inputPlaca.addEventListener('input', (e) => {
+                let valor = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                let letras = valor.slice(0, 3).replace(/[^A-Z]/g, '');
+                let numeros = valor.slice(3, 7).replace(/[^0-9]/g, '');
+                if (valor.length > 3) {
+                    e.target.value = letras + '-' + numeros;
+                } else {
+                    e.target.value = letras;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

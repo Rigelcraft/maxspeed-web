@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - MaxSpeed</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body class="body-menu">
+    <div class="contenedor-principal">
+        <header class="bloque-encabezado">
+            <img src="logo.png" class="logo-imagen">
+        </header>
+        
+        <div class="bloque-busqueda">
+            <div class="caja-busqueda">
+                <span class="icono-lupa">🔍</span>
+                <input type="text" id="buscador" placeholder="  Buscar por cliente o placa">
+            </div>
+        </div>
+
+        <nav class="menu-botones">
+            <a href="explorador.html" style="text-decoration: none;"><div class="btn btn-explorador">Explorador</div></a>
+            <a href="nuevo-ingreso.html" style="text-decoration: none;"><div class="btn btn-nuevo">Nuevo Ingreso</div></a>
+            <a href="inventario.html" style="text-decoration: none;"><div class="btn btn-inventario">Inventario</div></a>
+            <a href="caja.html" style="text-decoration: none;"><div class="btn btn-caja">Caja</div></a>
+            <a href="compra-venta.html" style="text-decoration: none;"><div class="btn btn-negocios">Compra y Venta</div></a>
+            
+            <button onclick="cerrarSesion()" class="btn" style="background-color: #d9534f; color: white; margin-top: 20px; cursor: pointer; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold;">Cerrar Sesión</button>
+        </nav>
+    </div>
+
+    <script>
+        // 1. SEGURIDAD: Si no es admin, no puede estar aquí
+        if (localStorage.getItem('tipoUsuario') !== 'admin') {
+            window.location.href = "index.html";
+        }
+
+        // 2. FUNCIÓN CERRAR SESIÓN
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        // 3. BUSCADOR INTELIGENTE
+        document.getElementById('buscador').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const busqueda = this.value;
+                if(busqueda.trim() !== "") {
+                    // Redirige al explorador pasando el término de búsqueda
+                    window.location.href = "explorador.html?buscar=" + encodeURIComponent(busqueda);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

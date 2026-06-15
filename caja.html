@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MaxSpeed - Caja / Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body.body-caja {
+            background: #f0f2f5 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+            align-items: normal !important;
+            justify-content: normal !important;
+            min-height: auto !important;
+        }
+
+        body {
+            background: #f0f2f5 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 40px;
+        }
+
+        /* Header */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-header img {
+            width: 350px;
+            max-width: 80%;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 8px;
+        }
+
+        /* Selector de módulos (Taller / CompraVenta / Todo) */
+        .modulos {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modulo-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background: white;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            color: #555;
+        }
+
+        .modulo-btn.activo {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        /* Selector de período */
+        .periodo-selector {
+            background: white;
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .periodo-filas {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .periodo-btn {
+            padding: 8px 12px;
+            background: #f0f2f5;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .periodo-btn.activo {
+            background: #FF8533;
+            color: white;
+        }
+
+        .fecha-especifica {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .fecha-especifica input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .fecha-especifica button {
+            background: #FF8533;
+            border: none;
+            border-radius: 30px;
+            padding: 0 16px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Tarjeta principal de total */
+        .card-total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px;
+            padding: 24px 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+
+        .card-total .label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+        .card-total .amount {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 8px 0;
+            word-break: break-word;
+        }
+
+        .card-total .sub {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        /* Grid de tarjetas */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-card .icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .info-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .info-card .label {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Tarjeta de ganancia por día */
+        .card-earning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-earning .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .card-earning .label {
+            font-size: 0.7rem;
+            opacity: 0.9;
+        }
+
+        /* Lista de trabajos */
+        .trabajos-container {
+            background: white;
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .trabajos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 12px;
+        }
+
+        .trabajos-header h3 {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .trabajos-header span {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        .lista-trabajos {
+            max-height: 400px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .item-trabajo {
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .item-trabajo:active {
+            background: #f9f9f9;
+        }
+
+        .cliente-nombre {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .fecha-trabajo {
+            font-size: 0.65rem;
+            color: #aaa;
+        }
+
+        .trabajo-desc {
+            font-size: 0.75rem;
+            color: #666;
+            margin: 6px 0;
+        }
+
+        .precio {
+            font-weight: bold;
+            color: #2ecc71;
+            font-size: 0.9rem;
+        }
+
+        .ganancia-diaria {
+            font-size: 0.65rem;
+            color: #FF8533;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-volver {
+            background: #7f8c8d;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .btn-volver:active {
+            background: #6c7a7a;
+            transform: scale(0.98);
+        }
+
+        .loading, .empty {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+
+        .selector-filas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .selector-grupo {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .selector-grupo label {
+            display: block;
+            font-size: 0.65rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .selector-desplegable {
+            width: 100%;
+            padding: 10px 8px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .selector-desplegable:focus {
+            outline: none;
+            border-color: #FF8533;
+        }
+
+        /* Pestañas para cambiar entre Mes / Semana / Día */
+        .tipo-vista {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tipo-btn {
+            flex: 1;
+            padding: 10px 8px;
+            background: #f0f2f5;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+        }
+
+        .tipo-btn.activo {
+            background: #FF8533;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255,133,51,0.3);
+        }
+
+        .tipo-btn:active {
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+<body class="body-caja">
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <img src="logo.png" alt="MaxSpeed">
+            <h1>📊 Panel de Caja</h1>
+        </div>
+
+        <!-- Selector de módulo -->
+        <div class="modulos">
+            <button class="modulo-btn activo" data-modulo="taller">🔧 Taller</button>
+            <button class="modulo-btn" data-modulo="vehiculos">🚗 Compra/Venta</button>
+            <button class="modulo-btn" data-modulo="todo">🎯 Todo</button>
+        </div>
+
+        <!-- Selector de período con desplegables -->
+        <div class="periodo-selector">
+            <!-- Pestañas para elegir el tipo de vista -->
+            <div class="tipo-vista">
+                <button class="tipo-btn activo" data-tipo="mes">📅 Por Mes</button>
+                <button class="tipo-btn" data-tipo="semana">📆 Por Semana</button>
+                <button class="tipo-btn" data-tipo="dia">📅 Por Día</button>
+            </div>
+
+            <!-- Selectores de MES (se muestran por defecto) -->
+            <div id="selectores-mes" class="selector-filas">
+                <div class="selector-grupo">
+                    <label>📅 Año</label>
+                    <select id="selectorAnio" class="selector-desplegable">
+                    </select>
+                </div>
+                <div class="selector-grupo">
+                    <label>📆 Mes</label>
+                    <select id="selectorMes" class="selector-desplegable">
+                        <option value="0">Enero</option>
+                        <option value="1">Febrero</option>
+                        <option value="2">Marzo</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Mayo</option>
+                        <option value="5">Junio</option>
+                        <option value="6">Julio</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Septiembre</option>
+                        <option value="9">Octubre</option>
+                        <option value="10">Noviembre</option>
+                        <option value="11">Diciembre</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Selectores de SEMANA (ocultos inicialmente) -->
+            <div id="selectores-semana" class="selector-filas" style="display: none;">
+                <div class="selector-grupo" style="flex: 2;">
+                    <label>📆 Seleccionar semana</label>
+                    <select id="selectorSemana" class="selector-desplegable">
+                        <option value="0">Esta semana</option>
+                        <option value="1">Semana pasada</option>
+                        <option value="2">Hace 2 semanas</option>
+                        <option value="3">Hace 3 semanas</option>
+                        <option value="4">Hace 4 semanas</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Selectores de DÍA (ocultos inicialmente) -->
+            <div id="selectores-dia" class="selector-filas" style="display: none;">
+                <div class="selector-grupo" style="flex: 2;">
+                    <label>📅 Seleccionar día</label>
+                    <input type="date" id="selectorFechaDia" class="selector-desplegable">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta total principal -->
+        <div class="card-total">
+            <div class="label" id="totalLabel">💰 TOTAL DEL PERÍODO</div>
+            <div class="amount" id="totalAcumulado">$0</div>
+            <div class="sub" id="periodoDescripcion">(Este mes)</div>
+        </div>
+
+        <!-- Grid de tarjetas -->
+        <div class="grid-cards">
+            <div class="info-card">
+                <div class="icon">📋</div>
+                <div class="value" id="totalTrabajos">0</div>
+                <div class="label">Transacciones</div>
+            </div>
+            <div class="info-card">
+                <div class="icon">💰</div>
+                <div class="value" id="totalIngresos">$0</div>
+                <div class="label">Ingresos totales</div>
+            </div>
+            <div class="info-card">
+                <div class="icon">📊</div>
+                <div class="value" id="promedioTrabajo">$0</div>
+                <div class="label">Promedio</div>
+            </div>
+            <div class="info-card">
+                <div class="icon">⏱️</div>
+                <div class="value" id="trabajoMasLargo">0</div>
+                <div class="label">Día(s) más largo</div>
+            </div>
+        </div>
+
+        <!-- Tarjeta ganancia por día -->
+        <div class="card-earning">
+            <div>
+                <div class="label">💵 GANANCIA POR DÍA</div>
+                <div class="value" id="gananciaPorDia">$0</div>
+            </div>
+            <div class="text-right">
+                <div class="label">📅 Total días</div>
+                <div class="value" id="totalDiasTrabajo" style="font-size:1.5rem;">0</div>
+            </div>
+        </div>
+
+        <!-- Lista de trabajos -->
+        <div class="trabajos-container">
+            <div class="trabajos-header">
+                <h3 id="listaTitulo">📋 Últimos trabajos</h3>
+                <span>toca para ver detalle</span>
+            </div>
+            <div class="lista-trabajos" id="listaTrabajos">
+                <div class="loading">Cargando...</div>
+            </div>
+        </div>
+
+        <button class="btn-volver" onclick="window.location.href='menu.html'">← Volver al Menú</button>
+    </div>
+
+    <script>
+        let todosLosTrabajos = [];
+        let todosLosVehiculos = []; // Para compra/venta
+        let datosOriginales = [];
+        let moduloActual = "taller";
+        let periodoActual = "mes";
+        let fechaEspecifica = null;
+
+        function calcularDias(fechaIngreso, fechaSalida) {
+            if (!fechaIngreso || !fechaSalida) return 1;
+            const ingreso = new Date(fechaIngreso);
+            const salida = new Date(fechaSalida);
+            const diffTime = Math.abs(salida - ingreso);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays === 0 ? 1 : diffDays;
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const tipoUsuario = localStorage.getItem('tipoUsuario');
+            const pinGuardado = localStorage.getItem('pinValidated');
+            
+            if (tipoUsuario !== 'admin') {
+                alert("⛔ Acceso denegado");
+                window.location.href = "menu.html";
+                return;
+            }
+            if (!pinGuardado) {
+                window.location.href = "index.html";
+                return;
+            }
+            
+            await cargarDatos();
+            
+            // Configurar valores predeterminados según fecha actual
+            const fechaActual = new Date();
+            const anioActual = fechaActual.getFullYear();
+            const mesActual = fechaActual.getMonth();
+
+            document.getElementById('selectorAnio').value = anioActual;
+            document.getElementById('selectorMes').value = mesActual;
+
+            // Variables para saber qué tipo de vista está activa
+            let tipoVistaActual = "mes"; // mes, semana, dia
+
+            // Función para cambiar la vista (Mes/Semana/Día)
+            function cambiarTipoVista(tipo) {
+                tipoVistaActual = tipo;
+                
+                // Ocultar/mostrar selectores según el tipo
+                document.getElementById('selectores-mes').style.display = tipo === "mes" ? "flex" : "none";
+                document.getElementById('selectores-semana').style.display = tipo === "semana" ? "flex" : "none";
+                document.getElementById('selectores-dia').style.display = tipo === "dia" ? "flex" : "none";
+                
+                // Actualizar clase activa en los botones
+                document.querySelectorAll('.tipo-btn').forEach(btn => {
+                    if (btn.dataset.tipo === tipo) {
+                        btn.classList.add('activo');
+                    } else {
+                        btn.classList.remove('activo');
+                    }
+                });
+
+                
+                actualizarVista();
+            }
+
+            // Eventos de las pestañas
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    cambiarTipoVista(btn.dataset.tipo);
+                });
+            });
+
+            // Eventos de los selectores
+            document.getElementById('selectorAnio').addEventListener('change', () => actualizarVista());
+            document.getElementById('selectorMes').addEventListener('change', () => actualizarVista());
+            document.getElementById('selectorSemana').addEventListener('change', () => actualizarVista());
+            document.getElementById('selectorFechaDia').addEventListener('change', () => actualizarVista());
+
+            // Eventos módulos
+            document.querySelectorAll('.modulo-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.modulo-btn').forEach(b => b.classList.remove('activo'));
+                    btn.classList.add('activo');
+                    moduloActual = btn.dataset.modulo;
+                    actualizarVista();
+                });
+            });
+            
+            // Eventos períodos
+            document.querySelectorAll('.periodo-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('activo'));
+                    btn.classList.add('activo');
+                    periodoActual = btn.dataset.periodo;
+                    fechaEspecifica = null;
+                    document.getElementById('fechaEspecifica').value = '';
+                    actualizarVista();
+                });
+            });
+            
+            document.getElementById('btnFechaEspecifica').addEventListener('click', () => {
+                const fecha = document.getElementById('fechaEspecifica').value;
+                if (fecha) {
+                    fechaEspecifica = fecha;
+                    document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('activo'));
+                    periodoActual = null;
+                    actualizarVista();
+                } else {
+                    alert("Selecciona una fecha");
+                }
+            });
+            
+            actualizarVista();
+
+            // Generar años dinámicos (desde 2024 hasta año actual + 5)
+            function generarAnios() {
+                const selectorAnio = document.getElementById('selectorAnio');
+                const añoActual = new Date().getFullYear();
+                const añoInicio = 2024;
+                const añoFin = añoActual + 5;
+                
+                selectorAnio.innerHTML = '';
+                for (let año = añoInicio; año <= añoFin; año++) {
+                    const option = document.createElement('option');
+                    option.value = año;
+                    option.textContent = año;
+                    if (año === añoActual) {
+                        option.selected = true;
+                    }
+                    selectorAnio.appendChild(option);
+                }
+            }
+        });
+        
+        async function cargarDatos() {
+            try {
+                const pinGuardado = localStorage.getItem('pinValidated');
+                const res = await fetch(`/obtener-clientes?pin=${pinGuardado}`);
+                datosOriginales = await res.json();
+                if (datosOriginales.error) return;
+                
+                todosLosTrabajos = [];
+                datosOriginales.forEach(registro => {
+                    const fechaGanancia = registro.fechaSalida || registro.fechaIngreso;
+                    const diasDuracion = calcularDias(registro.fechaIngreso, registro.fechaSalida);
+                    let trabajoAgregado = false;
+                    
+                    if (registro.trabajos && registro.trabajos.length > 0) {
+                        registro.trabajos.forEach(trabajo => {
+                            if (trabajo.precio && parseFloat(trabajo.precio) > 0) {
+                                todosLosTrabajos.push({
+                                    id: registro._id,
+                                    cliente: registro.cliente,
+                                    fecha: fechaGanancia,
+                                    diasDuracion: diasDuracion,
+                                    gananciaPorDia: parseFloat(trabajo.precio) / diasDuracion,
+                                    descripcion: trabajo.descripcion,
+                                    precio: parseFloat(trabajo.precio) || 0,
+                                    vehiculo: registro.vehiculo?.modelo || "N/A",
+                                    tipo: "taller"
+                                });
+                                trabajoAgregado = true;
+                            }
+                        });
+                    }
+                    
+                    if (!trabajoAgregado && registro.total && parseFloat(registro.total) > 0) {
+                        todosLosTrabajos.push({
+                            id: registro._id,
+                            cliente: registro.cliente,
+                            fecha: fechaGanancia,
+                            diasDuracion: diasDuracion,
+                            gananciaPorDia: parseFloat(registro.total) / diasDuracion,
+                            descripcion: registro.observacionesAdicionales || "Servicio completo",
+                            precio: parseFloat(registro.total) || 0,
+                            vehiculo: registro.vehiculo?.modelo || "N/A",
+                            tipo: "taller"
+                        });
+                    }
+                });
+                
+                console.log(`✅ ${todosLosTrabajos.length} trabajos de taller`);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+        
+        function obtenerRangoFecha() {
+            let inicio, fin;
+            let descripcion = "";
+            
+            const anio = parseInt(document.getElementById('selectorAnio').value);
+            const mes = parseInt(document.getElementById('selectorMes').value);
+            const semanaOffset = parseInt(document.getElementById('selectorSemana').value);
+            const fechaDia = document.getElementById('selectorFechaDia').value;
+            
+            // Vista por DÍA
+            if (tipoVistaActual === "dia" && fechaDia) {
+                inicio = new Date(fechaDia);
+                inicio.setHours(0,0,0,0);
+                fin = new Date(fechaDia);
+                fin.setHours(23,59,59,999);
+                descripcion = `${inicio.toLocaleDateString('es-ES')}`;
+                return { inicio, fin, descripcion };
+            }
+            
+            // Vista por SEMANA
+            if (tipoVistaActual === "semana") {
+                const hoy = new Date();
+                const diaSemana = hoy.getDay();
+                const diasOffset = (semanaOffset * 7) + diaSemana;
+                const inicioSemana = new Date(hoy);
+                inicioSemana.setDate(hoy.getDate() - diasOffset);
+                inicioSemana.setHours(0,0,0,0);
+                
+                const finSemana = new Date(inicioSemana);
+                finSemana.setDate(inicioSemana.getDate() + 6);
+                finSemana.setHours(23,59,59,999);
+                
+                inicio = inicioSemana;
+                fin = finSemana;
+                
+                const nombreSemana = semanaOffset === 0 ? "Esta semana" : 
+                                    semanaOffset === 1 ? "Semana pasada" :
+                                    `Hace ${semanaOffset} semanas`;
+                descripcion = `${nombreSemana} (${inicio.toLocaleDateString('es-ES')} - ${finSemana.toLocaleDateString('es-ES')})`;
+                return { inicio, fin, descripcion };
+            }
+            
+            // Vista por MES (por defecto)
+            inicio = new Date(anio, mes, 1);
+            fin = new Date(anio, mes + 1, 0, 23, 59, 59);
+            const nombreMes = document.querySelector('#selectorMes option:checked')?.text || "Mes";
+            descripcion = `${nombreMes} ${anio}`;
+            
+            return { inicio, fin, descripcion };
+        }
+        
+        function filtrarPorModuloYFecha() {
+            const { inicio, fin, descripcion } = obtenerRangoFecha();
+            document.getElementById('periodoDescripcion').textContent = descripcion;
+            
+            let items = [];
+            if (moduloActual === "taller" || moduloActual === "todo") {
+                items = items.concat(todosLosTrabajos);
+            }
+            if (moduloActual === "vehiculos" || moduloActual === "todo") {
+                // TODO: Agregar datos de compra/venta cuando existan
+                // Por ahora solo taller
+            }
+            
+            const filtrados = items.filter(item => {
+                const fecha = new Date(item.fecha);
+                return fecha >= inicio && fecha <= fin;
+            });
+            
+            return filtrados;
+        }
+        
+        function actualizarVista() {
+            const items = filtrarPorModuloYFecha();
+            
+            const total = items.reduce((sum, t) => sum + t.precio, 0);
+            const promedio = items.length > 0 ? total / items.length : 0;
+            const gananciaPorDiaTotal = items.reduce((sum, t) => sum + (t.gananciaPorDia || 0), 0);
+            const maxDias = items.length > 0 ? Math.max(...items.map(t => t.diasDuracion || 1)) : 0;
+            const totalDias = items.reduce((sum, t) => sum + (t.diasDuracion || 1), 0);
+            
+            let titulo = "📋 Últimos trabajos";
+            if (moduloActual === "vehiculos") titulo = "🚗 Vehículos comprados/vendidos";
+            if (moduloActual === "todo") titulo = "🎯 Todo (Taller + Vehículos)";
+            document.getElementById('listaTitulo').textContent = titulo;
+            
+            let labelTotal = "💰 TOTAL DEL PERÍODO";
+            if (moduloActual === "vehiculos") labelTotal = "💰 GANANCIA EN VEHÍCULOS";
+            if (moduloActual === "todo") labelTotal = "💰 TOTAL ACUMULADO";
+            document.getElementById('totalLabel').textContent = labelTotal;
+            
+            document.getElementById('totalAcumulado').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('totalTrabajos').textContent = items.length;
+            document.getElementById('totalIngresos').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('promedioTrabajo').textContent = `$${promedio.toFixed(2)}`;
+            document.getElementById('gananciaPorDia').textContent = `$${gananciaPorDiaTotal.toFixed(2)}`;
+            document.getElementById('trabajoMasLargo').textContent = maxDias;
+            document.getElementById('totalDiasTrabajo').textContent = totalDias;
+            
+            const contenedor = document.getElementById('listaTrabajos');
+            if (items.length === 0) {
+                contenedor.innerHTML = '<div class="empty">📭 No hay registros en este período</div>';
+                return;
+            }
+            
+            items.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            contenedor.innerHTML = items.slice(0, 20).map(t => `
+                <div class="item-trabajo" onclick="verDetalle('${t.id}')">
+                    <div class="flex-between">
+                        <span class="cliente-nombre">👤 ${escapeHtml(t.cliente)}</span>
+                        <span class="fecha-trabajo">${formatearFecha(t.fecha)}</span>
+                    </div>
+                    <div class="trabajo-desc">🔧 ${escapeHtml(t.descripcion)} (${escapeHtml(t.vehiculo)})</div>
+                    <div class="flex-between">
+                        <span class="ganancia-diaria">⏱️ ${t.diasDuracion} día(s) - $${t.gananciaPorDia.toFixed(2)}/día</span>
+                        <span class="precio">💰 $${t.precio.toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function formatearFecha(fechaISO) {
+            if (!fechaISO) return "S/F";
+            const fecha = new Date(fechaISO);
+            return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+        }
+        
+        function escapeHtml(texto) {
+            if (!texto) return "";
+            return texto.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+        
+        function verDetalle(id) {
+            const registro = datosOriginales.find(r => r._id === id);
+            if (registro) {
+                localStorage.setItem('trabajoSeleccionado', JSON.stringify(registro));
+                window.location.href = "ver-trabajo.html";
+            } else {
+                alert("No se encontró el trabajo");
+            }
+        }
+    </script>
+</body>
+</html>

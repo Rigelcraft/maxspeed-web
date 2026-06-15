@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxspeed - Acceso</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Feedback visual al presionar los números */
+        .boton-numero:active {
+            transform: scale(0.95);
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: 0.1s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-principal">
+        <header class="bloque-encabezado">
+            <img src="logo.png" alt="Maxspeed Ingeniería Automotriz" class="logo-imagen">
+        </header>
+
+        <section class="bloque-bienvenida">
+            <p>Por favor ingrese su PIN de verificación</p>
+        </section>
+
+        <section class="bloque-visualizacion">
+            <div class="input-pin-con-guiones">
+                <div class="casilla-digital"><span class="numero-texto"></span><span class="guion"></span></div>
+                <div class="casilla-digital"><span class="numero-texto"></span><span class="guion"></span></div>
+                <div class="casilla-digital"><span class="numero-texto"></span><span class="guion"></span></div>
+                <div class="casilla-digital"><span class="numero-texto"></span><span class="guion"></span></div>
+                <div class="casilla-digital"><span class="numero-texto"></span><span class="guion"></span></div>
+                <div class="casilla-digital"><span class="numero-texto"></span><span class="guion"></span></div>
+            </div>
+        </section>
+
+        <section class="bloque-teclado">
+            <div class="teclado-grid">
+                <button class="boton-numero" onclick="presionarNumero('1')">1</button>
+                <button class="boton-numero" onclick="presionarNumero('2')">2</button>
+                <button class="boton-numero" onclick="presionarNumero('3')">3</button>
+                <button class="boton-numero" onclick="presionarNumero('4')">4</button>
+                <button class="boton-numero" onclick="presionarNumero('5')">5</button>
+                <button class="boton-numero" onclick="presionarNumero('6')">6</button>
+                <button class="boton-numero" onclick="presionarNumero('7')">7</button>
+                <button class="boton-numero" onclick="presionarNumero('8')">8</button>
+                <button class="boton-numero" onclick="presionarNumero('9')">9</button>
+                <button class="boton-numero btn-accion" onclick="borrarUltimo()">&lt;</button>
+                <button class="boton-numero" onclick="presionarNumero('0')">0</button>
+                <button class="boton-numero btn-accion" onclick="verificarPIN()">✓</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let pinIngresado = ""; 
+        const MAX_DIGITOS = 6;
+        const camposTexto = document.querySelectorAll('.numero-texto');
+        const lineasGuion = document.querySelectorAll('.guion');
+
+        function presionarNumero(numero) {
+            if (pinIngresado.length < MAX_DIGITOS) {
+                pinIngresado += numero;
+                actualizarPantallaVisual();
+                
+                // AUTO-SUBMIT: Si llega a 6, espera 200ms y verifica solo
+                if (pinIngresado.length === MAX_DIGITOS) {
+                    setTimeout(verificarPIN, 200); 
+                }
+            }
+        }
+
+        function borrarUltimo() {
+            if (pinIngresado.length > 0) {
+                pinIngresado = pinIngresado.slice(0, -1);
+                actualizarPantallaVisual();
+            }
+        }
+
+        function actualizarPantallaVisual() {
+            camposTexto.forEach((campo, indice) => {
+                if (indice < pinIngresado.length) {
+                    campo.textContent = pinIngresado[indice]; 
+                    lineasGuion[indice].style.opacity = "0";  
+                } else {
+                    campo.textContent = "";                    
+                    lineasGuion[indice].style.opacity = "1";  
+                }
+            });
+        }
+
+        function verificarPIN() {
+            fetch('/validar-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pinIngresado })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.valido) {
+                    localStorage.setItem('tipoUsuario', data.rol);
+                    localStorage.setItem('pinValidated', pinIngresado);  // ← Esta línea es clave
+                    localStorage.setItem('nombreClienteSession', data.cliente || "Admin");
+                    
+                    window.location.href = (data.rol === 'admin') ? "menu.html" : "explorador.html";
+                } else {
+                    alert("❌ PIN Incorrecto.");
+                    reiniciarTeclado();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("❌ Error de conexión.");
+            });
+        }
+
+        function reiniciarTeclado() {
+            pinIngresado = "";
+            actualizarPantallaVisual();
+        }
+
+        // Soporte para teclado físico
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                presionarNumero(e.key);
+            } else if (e.key === 'Backspace') {
+                borrarUltimo();
+            } else if (e.key === 'Enter') {
+                verificarPIN();
+            }
+        });
+    </script>
+</body>
+</html>
