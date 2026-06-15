@@ -5,7 +5,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const mongoose = require('mongoose');
 
-const PUERTO = 3000;
+const PUERTO = process.env.PORT || 3000;
 const PINES_ADMIN = ["0000", "1234"];
 
 mongoose.connect(process.env.MONGO_URI)
