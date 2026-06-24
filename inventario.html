@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxSpeed - Inventario</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ESTILOS PROPIOS DEL INVENTARIO */
+        body {
+            background: #f0f2f5 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .contenedor-inventario {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 40px;
+        }
+
+        .header-inventario {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header-inventario img {
+            width: 200px;
+            max-width: 80%;
+        }
+
+        .header-inventario h1 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 8px;
+        }
+
+        /* Botón flotante de agregar */
+        .btn-flotante {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #FF8533;
+            color: white;
+            font-size: 2.5rem;
+            border: none;
+            box-shadow: 0 4px 15px rgba(255,133,51,0.5);
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+
+        .btn-flotante:active {
+            transform: scale(0.9);
+        }
+
+        /* Tarjeta de producto */
+        .producto-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .producto-info {
+            flex: 1;
+        }
+
+        .producto-nombre {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .producto-detalle {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .producto-stock {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #2ecc71;
+        }
+
+        .producto-stock.bajo {
+            color: #e74c3c;
+        }
+
+        .producto-precios {
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .precio-venta {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .precio-costo {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        .acciones-producto {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+
+        .btn-accion {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px;
+        }
+
+        .btn-editar { color: #3498db; }
+        .btn-eliminar { color: #e74c3c; }
+
+        /* Modal para agregar/editar */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.abierto {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .modal .campo {
+            margin-bottom: 12px;
+        }
+
+        .modal .campo label {
+            display: block;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .modal .campo input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        .modal .campo input:focus {
+            outline: none;
+            border-color: #FF8533;
+        }
+
+        .modal .botones-modal {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .modal .btn-guardar {
+            flex: 2;
+            background: #FF8533;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal .btn-cancelar {
+            flex: 1;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .sin-productos {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .stock-bajo {
+            background: #fde8e8 !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+
+        .btn-volver-menu {
+            background: #7f8c8d;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .btn-volver-menu:active {
+            background: #6c7a7a;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-inventario">
+        <div class="header-inventario">
+            <img src="logo.png" alt="MaxSpeed">
+            <h1>📦 Inventario</h1>
+        </div>
+
+        <!-- Lista de productos -->
+        <div id="listaProductos">
+            <div class="loading">Cargando inventario...</div>
+        </div>
+
+        <button class="btn-volver-menu" onclick="window.location.href='menu.html'">← Volver al Menú</button>
+    </div>
+
+    <!-- Botón flotante para agregar -->
+    <button class="btn-flotante" id="btnAgregar">+</button>
+
+    <!-- Modal para agregar/editar -->
+    <div class="modal-overlay" id="modalInventario">
+        <div class="modal">
+            <h2 id="modalTitulo">Agregar Producto</h2>
+            
+            <div class="campo">
+                <label>Nombre del producto *</label>
+                <input type="text" id="inputNombre" placeholder="Ej. Aceite 10W30">
+            </div>
+            
+            <div class="campo">
+                <label>Costo (lo que pagaste) *</label>
+                <input type="number" id="inputCosto" placeholder="0.00" step="0.01">
+            </div>
+            
+            <div class="campo">
+                <label>Precio de venta (al cliente) *</label>
+                <input type="number" id="inputPrecio" placeholder="0.00" step="0.01">
+            </div>
+            
+            <div class="campo">
+                <label>Cantidad en stock *</label>
+                <input type="number" id="inputStock" placeholder="0" step="1">
+            </div>
+            
+            <div class="campo">
+                <label>Proveedor (opcional)</label>
+                <input type="text" id="inputProveedor" placeholder="Ej. Distribuidora XYZ">
+            </div>
+            
+            <div class="botones-modal">
+                <button class="btn-cancelar" id="btnCancelarModal">Cancelar</button>
+                <button class="btn-guardar" id="btnGuardarProducto">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productos = [];
+        let productoEditando = null; // null = nuevo, o _id del producto
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Verificar autenticación
+            const tipoUsuario = localStorage.getItem('tipoUsuario');
+            const pinGuardado = localStorage.getItem('pinValidated');
+
+            if (tipoUsuario !== 'admin') {
+                alert("⛔ Acceso denegado. Solo administradores pueden ver el inventario.");
+                window.location.href = "menu.html";
+                return;
+            }
+
+            if (!pinGuardado) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            await cargarInventario();
+
+            // Eventos del modal
+            document.getElementById('btnAgregar').addEventListener('click', () => abrirModal());
+            document.getElementById('btnCancelarModal').addEventListener('click', cerrarModal);
+            document.getElementById('btnGuardarProducto').addEventListener('click', guardarProducto);
+            
+            // Cerrar modal al hacer clic fuera
+            document.getElementById('modalInventario').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modalInventario')) cerrarModal();
+            });
+        });
+
+        async function cargarInventario() {
+            try {
+                const res = await fetch('/obtener-inventario');
+                productos = await res.json();
+                mostrarProductos();
+            } catch (error) {
+                console.error("Error cargando inventario:", error);
+                document.getElementById('listaProductos').innerHTML = '<div class="sin-productos">❌ Error al cargar el inventario</div>';
+            }
+        }
+
+        function mostrarProductos() {
+            const contenedor = document.getElementById('listaProductos');
+
+            if (productos.length === 0) {
+                contenedor.innerHTML = '<div class="sin-productos">📭 No hay productos en el inventario.<br>Presiona el botón + para agregar</div>';
+                return;
+            }
+
+            contenedor.innerHTML = productos.map(p => `
+                <div class="producto-card ${p.stock < 5 ? 'stock-bajo' : ''}">
+                    <div class="producto-info">
+                        <div class="producto-nombre">${escapeHtml(p.nombre)}</div>
+                        <div class="producto-detalle">
+                            ${p.proveedor ? `🏷️ ${escapeHtml(p.proveedor)} · ` : ''}
+                            💰 Costo: $${parseFloat(p.costo).toFixed(2)}
+                        </div>
+                        <div class="producto-precios">
+                            <span class="precio-venta">💰 $${parseFloat(p.precioVenta).toFixed(2)}</span>
+                            <span class="precio-costo"> | Costo: $${parseFloat(p.costo).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; min-width: 60px;">
+                        <div class="producto-stock ${p.stock < 5 ? 'bajo' : ''}">${p.stock}</div>
+                        <div style="font-size: 0.6rem; color: #888;">${p.stock < 5 ? '⚠️ Bajo' : 'Stock'}</div>
+                    </div>
+                    <div class="acciones-producto">
+                        <button class="btn-accion btn-editar" onclick="editarProducto('${p._id}')">✏️</button>
+                        <button class="btn-accion btn-eliminar" onclick="eliminarProducto('${p._id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function abrirModal(producto = null) {
+            const modal = document.getElementById('modalInventario');
+            const titulo = document.getElementById('modalTitulo');
+
+            if (producto) {
+                titulo.textContent = '✏️ Editar Producto';
+                document.getElementById('inputNombre').value = producto.nombre || '';
+                document.getElementById('inputCosto').value = producto.costo || '';
+                document.getElementById('inputPrecio').value = producto.precioVenta || '';
+                document.getElementById('inputStock').value = producto.stock || '';
+                document.getElementById('inputProveedor').value = producto.proveedor || '';
+                productoEditando = producto._id;
+            } else {
+                titulo.textContent = '➕ Agregar Producto';
+                document.getElementById('inputNombre').value = '';
+                document.getElementById('inputCosto').value = '';
+                document.getElementById('inputPrecio').value = '';
+                document.getElementById('inputStock').value = '';
+                document.getElementById('inputProveedor').value = '';
+                productoEditando = null;
+            }
+
+            modal.classList.add('abierto');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalInventario').classList.remove('abierto');
+            productoEditando = null;
+        }
+
+        function editarProducto(id) {
+            const producto = productos.find(p => p._id === id);
+            if (producto) abrirModal(producto);
+        }
+
+        async function guardarProducto() {
+            const nombre = document.getElementById('inputNombre').value.trim();
+            const costo = parseFloat(document.getElementById('inputCosto').value);
+            const precioVenta = parseFloat(document.getElementById('inputPrecio').value);
+            const stock = parseInt(document.getElementById('inputStock').value);
+            const proveedor = document.getElementById('inputProveedor').value.trim();
+
+            // Validaciones
+            if (!nombre) { alert("❌ El nombre es obligatorio"); return; }
+            if (isNaN(costo) || costo <= 0) { alert("❌ El costo debe ser mayor a 0"); return; }
+            if (isNaN(precioVenta) || precioVenta <= 0) { alert("❌ El precio de venta debe ser mayor a 0"); return; }
+            if (isNaN(stock) || stock < 0) { alert("❌ El stock no puede ser negativo"); return; }
+
+            const datos = { nombre, costo, precioVenta, stock, proveedor };
+
+            let url = '/guardar-producto';
+            let metodo = 'POST';
+            
+            if (productoEditando) {
+                datos._id = productoEditando;
+                url = '/actualizar-producto';
+                metodo = 'POST';
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: metodo,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+                const resultado = await res.json();
+                alert(resultado.mensaje || '✅ Producto guardado');
+                cerrarModal();
+                await cargarInventario();
+            } catch (error) {
+                console.error("Error:", error);
+                alert("❌ Error al guardar el producto");
+            }
+        }
+
+        async function eliminarProducto(id) {
+            if (!confirm("⚠️ ¿Eliminar este producto permanentemente?")) return;
+
+            try {
+                const res = await fetch('/eliminar-producto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ _id: id })
+                });
+                const resultado = await res.json();
+                alert(resultado.mensaje || '✅ Producto eliminado');
+                await cargarInventario();
+            } catch (error) {
+                console.error("Error:", error);
+                alert("❌ Error al eliminar el producto");
+            }
+        }
+
+        function escapeHtml(texto) {
+            if (!texto) return "";
+            return texto.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+    </script>
+</body>
+</html>
