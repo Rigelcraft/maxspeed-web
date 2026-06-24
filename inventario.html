@@ -6,12 +6,19 @@
     <title>MaxSpeed - Inventario</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ESTILOS PROPIOS DEL INVENTARIO */
+        /* --- 1. RESET Y GLOBALES (Idéntico a tu Menú) --- */
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
+            font-family: 'Arial', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            min-height: 100vh;
         }
 
         body {
@@ -20,53 +27,154 @@
             background-position: 80% !important;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-color: rgba(0, 0, 0, 0.35);
+            background-color: rgb(0 0 0 / 34%);
             background-blend-mode: darken;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 40px !important;
         }
 
-        /* HEADER FIJO EN LA PARTE SUPERIOR (Elegante y translúcido) */
-        .header-inventario {
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* --- 2. LAYOUT Y ELEMENTOS COMUNES --- */
+        .contenedor-principal {
             width: 100%;
-            background: rgba(240, 242, 245, 0.35); /* Fondo muy claro y transparente */
-            text-align: center;
-            padding: 14px 0 10px 0;
-            z-index: 150;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(12px); /* Difumina la imagen de fondo por detrás */
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            max-width: 360px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 5px !important;
         }
 
-        .header-inventario img {
-            width: 250px; /* Tamaño ideal y grande para móvil */
-            max-width: 80%;
+        .bloque-encabezado {
+            width: 100%;
+            display: flex;
+            margin-top: -10px !important;
+            margin-bottom: 5px !important;
+            justify-content: center;
+        }
+
+        .logo-imagen {
+            max-width: 100%;
+            width: 350px;
             height: auto;
         }
 
-        .header-inventario h1 {
-            font-size: 1.5rem;
-            color: #ffffff; /* Texto blanco para resaltar sobre el fondo oscuro */
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
-            margin: 6px 0 0 0;
-            font-weight: 700;
+        .titulo-seccion {
+            color: #ffffff;
+            font-size: 25px;
+            font-weight: bold;
+            text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        /* CONTENEDOR DE PRODUCTOS (Margen superior calibrado) */
-        .contenedor-inventario {
-            max-width: 600px;
+        /* --- 3. TARJETAS DE PRODUCTOS OPTIMIZADAS --- */
+        #listaProductos {
             width: 100%;
-            margin: 0 auto;
-            padding: 150px 16px 40px 16px; /* Espacio ideal para que la primera tarjeta no se tape */
-            box-sizing: border-box;
         }
 
-        /* Botón flotante de agregar */
+        .producto-card {
+            background: white;
+            border: 4px solid #000;
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Distribuye los bloques a los extremos */
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .stock-bajo {
+            background: #fde8e8 !important;
+        }
+
+        /* Contenedor izquierdo para los textos */
+        .producto-info {
+            flex: 1; /* Ocupa todo el espacio libre de la izquierda */
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0; /* Evita que los textos colapsen o rompan el flex */
+            text-align: left; /* Alinea los nombres a la izquierda */
+        }
+
+        .producto-nombre {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #222;
+            line-height: 1.2;
+            word-break: break-word; /* Rompe por palabras de forma natural si es muy largo */
+        }
+
+        .producto-detalle {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Contenedor derecho para precios, stock y botones */
+        .producto-precios {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Alinea los costos a la derecha */
+            text-align: right;
+            min-width: 75px;
+            justify-content: center;
+        }
+
+        .precio-venta {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2ecc71;
+            white-space: nowrap; /* Evita que el precio se parta en dos renglones */
+        }
+
+        .precio-costo {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 1px;
+            white-space: nowrap;
+        }
+
+        .producto-stock-container {
+            text-align: center;
+            min-width: 45px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .producto-stock {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .producto-stock.bajo {
+            color: #e74c3c;
+        }
+
+        .acciones-producto {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-accion {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* --- 4. BOTONES Y MODAL --- */
         .btn-flotante {
             position: fixed;
             bottom: 30px;
@@ -77,56 +185,28 @@
             background: #FF8533;
             color: white;
             font-size: 2.5rem;
-            border: none;
-            box-shadow: 0 4px 15px rgba(255,133,51,0.5);
+            border: 4px solid #000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             cursor: pointer;
             z-index: 100;
-            transition: transform 0.2s;
         }
 
-        .btn-flotante:active {
-            transform: scale(0.9);
-        }
-
-        /* Tarjeta de producto */
-        .producto-card {
-            background: rgba(255, 255, 255, 0.96); /* Sutil transparencia profesional */
-            border-radius: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .producto-nombre {
+        .btn-volver-menu {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
             font-weight: bold;
-            font-size: 1rem;
-            color: #222;
-        }
-
-        .producto-stock.bajo {
-            color: #e74c3c;
-        }
-
-        .precio-venta {
-            font-weight: bold;
-            color: #2ecc71;
-        }
-
-        .acciones-producto {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-accion {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
+            color: white;
+            background-color: #7f8c8d;
+            border: 4px solid #000;
+            border-radius: 20px;
             cursor: pointer;
+            text-align: center;
+            margin-top: 15px;
         }
 
-        .btn-editar { color: #3498db; }
-        .btn-eliminar { color: #e74c3c; }
+        .btn-volver-menu:active { transform: scale(0.98); }
 
-        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -140,125 +220,42 @@
             align-items: center;
         }
 
-        .modal-overlay.abierto {
-            display: flex;
-        }
+        .modal-overlay.abierto { display: flex; }
 
         .modal {
             background: white;
-            border-radius: 24px;
-            padding: 24px;
-            max-width: 400px;
+            border: 4px solid #000;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 340px;
             width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
-        .modal h2 {
-            font-size: 1.2rem;
-            margin-bottom: 16px;
-            color: #333;
-        }
+        .modal h2 { font-size: 1.3rem; margin-bottom: 12px; text-align: center; }
+        .modal .campo { margin-bottom: 10px; }
+        .modal .campo label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+        .modal .campo input { width: 100%; padding: 10px; border: 3px solid #000; border-radius: 10px; font-weight: bold; }
+        .modal .botones-modal { display: flex; gap: 10px; margin-top: 15px; }
 
-        .modal .campo {
-            margin-bottom: 12px;
-        }
+        .modal .btn-guardar { flex: 2; background: #2ECC71; color: black; border: 3px solid #000; border-radius: 10px; padding: 10px; font-weight: bold; }
+        .modal .btn-cancelar { flex: 1; background: #e74c3c; color: white; border: 3px solid #000; border-radius: 10px; padding: 10px; font-weight: bold; }
 
-        .modal .campo label {
-            display: block;
-            font-size: 0.75rem;
-            color: #888;
-            margin-bottom: 4px;
-        }
-
-        .modal .campo input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            box-sizing: border-box;
-        }
-
-        .modal .campo input:focus {
-            outline: none;
-            border-color: #FF8533;
-        }
-
-        .modal .botones-modal {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .modal .btn-guardar {
-            flex: 2;
-            background: #FF8533;
+        .loading, .sin-productos {
             color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal .btn-cancelar {
-            flex: 1;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .sin-productos {
             text-align: center;
-            padding: 40px;
-            color: #eee;
-            font-size: 0.9rem;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-        }
-
-        .stock-bajo {
-            background: rgba(253, 232, 232, 0.96) !important;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #eee;
-        }
-
-        .btn-volver-menu {
-            background: #7f8c8d;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 40px;
-            color: white;
             font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .btn-volver-menu:active {
-            background: #6c7a7a;
-            transform: scale(0.98);
+            text-shadow: 1px 1px 4px #000;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="header-inventario">
-        <img src="logo.png" alt="MaxSpeed">
-        <h1>📦 Inventario</h1>
-    </div>
+    <div class="contenedor-principal">
+        <div class="bloque-encabezado">
+            <img src="logo.png" alt="MaxSpeed" class="logo-imagen">
+        </div>
+        <p class="titulo-seccion">📦 Inventario</p>
 
-    <div class="contenedor-inventario">
         <div id="listaProductos">
             <div class="loading">Cargando inventario...</div>
         </div>
@@ -266,10 +263,8 @@
         <button class="btn-volver-menu" onclick="window.location.href='menu.html'">← Volver al Menú</button>
     </div>
 
-    <!-- Botón flotante para agregar -->
     <button class="btn-flotante" id="btnAgregar">+</button>
 
-    <!-- Modal para agregar/editar -->
     <div class="modal-overlay" id="modalInventario">
         <div class="modal">
             <h2 id="modalTitulo">Agregar Producto</h2>
@@ -308,10 +303,9 @@
 
     <script>
         let productos = [];
-        let productoEditando = null; // null = nuevo, o _id del producto
+        let productoEditando = null; 
 
         document.addEventListener("DOMContentLoaded", async () => {
-            // Verificar autenticación
             const tipoUsuario = localStorage.getItem('tipoUsuario');
             const pinGuardado = localStorage.getItem('pinValidated');
 
@@ -328,12 +322,10 @@
 
             await cargarInventario();
 
-            // Eventos del modal
             document.getElementById('btnAgregar').addEventListener('click', () => abrirModal());
             document.getElementById('btnCancelarModal').addEventListener('click', cerrarModal);
             document.getElementById('btnGuardarProducto').addEventListener('click', guardarProducto);
             
-            // Cerrar modal al hacer clic fuera
             document.getElementById('modalInventario').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('modalInventario')) cerrarModal();
             });
@@ -359,34 +351,23 @@
             }
         
             contenedor.innerHTML = productos.map(p => `
-                <div class="producto-card ${p.stock < 5 ? 'stock-bajo' : ''}" style="display: flex; align-items: center; padding: 16px; gap: 12px;">
-                    
-                    <div class="producto-info" style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
-                        <div class="producto-nombre" style="margin: 0; line-height: 1.2; white-space: normal; word-break: break-word;">${escapeHtml(p.nombre)}</div>
-                        <div class="producto-detalle" style="margin: 0; font-size: 0.8rem; color: #888;">
-                            ${p.proveedor ? `🏷️ ${escapeHtml(p.proveedor)}` : '🏷️ Sin proveedor'}
-                        </div>
+                <div class="producto-card ${p.stock < 5 ? 'stock-bajo' : ''}">
+                    <div class="producto-info">
+                        <div class="producto-nombre">${escapeHtml(p.nombre)}</div>
+                        <div class="producto-detalle">${p.proveedor ? `🏷️ ${escapeHtml(p.proveedor)}` : '🏷️ Sin proveedor'}</div>
                     </div>
-        
-                    <div class="producto-precios" style="display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 80px;">
-                        <span class="precio-venta" style="font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 2px;">
-                            💰$${parseFloat(p.precioVenta).toFixed(2)}
-                        </span>
-                        <span class="precio-costo" style="font-size: 0.7rem; color: #999; margin-top: 1px; display: block;">
-                            Costo: $${parseFloat(p.costo).toFixed(2)}
-                        </span>
+                    <div class="producto-precios">
+                        <span class="precio-venta">💰$${parseFloat(p.precioVenta).toFixed(2)}</span>
+                        <span class="precio-costo">Costo: $${parseFloat(p.costo).toFixed(2)}</span>
                     </div>
-        
-                    <div style="text-align: center; min-width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                        <div class="producto-stock ${p.stock < 5 ? 'bajo' : ''}" style="line-height: 1; font-weight: bold;">${p.stock}</div>
-                        <div style="font-size: 0.6rem; color: #888; margin-top: 2px;">${p.stock < 5 ? '⚠️ Bajo' : 'Stock'}</div>
+                    <div class="producto-stock-container">
+                        <div class="producto-stock ${p.stock < 5 ? 'bajo' : ''}">${p.stock}</div>
+                        <div style="font-size: 0.6rem; color: #666; font-weight: bold;">${p.stock < 5 ? '⚠️ Bajo' : 'Stock'}</div>
                     </div>
-        
-                    <div class="acciones-producto" style="display: flex; gap: 4px; align-items: center; margin-left: 4px;">
-                        <button class="btn-accion btn-editar" onclick="editarProducto('${p._id}')" style="padding: 4px;">✏️</button>
-                        <button class="btn-accion btn-eliminar" onclick="eliminarProducto('${p._id}')" style="padding: 4px;">🗑️</button>
+                    <div class="acciones-producto">
+                        <button class="btn-accion" onclick="editarProducto('${p._id}')">✏️</button>
+                        <button class="btn-accion" onclick="eliminarProducto('${p._id}')">🗑️</button>
                     </div>
-        
                 </div>
             `).join('');
         }
@@ -433,7 +414,6 @@
             const stock = parseInt(document.getElementById('inputStock').value);
             const proveedor = document.getElementById('inputProveedor').value.trim();
 
-            // Validaciones
             if (!nombre) { alert("❌ El nombre es obligatorio"); return; }
             if (isNaN(costo) || costo <= 0) { alert("❌ El costo debe ser mayor a 0"); return; }
             if (isNaN(precioVenta) || precioVenta <= 0) { alert("❌ El precio de venta debe ser mayor a 0"); return; }
