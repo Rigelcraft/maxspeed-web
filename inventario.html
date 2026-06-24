@@ -15,47 +15,50 @@
             background-attachment: fixed;
             background-color: rgb(0 0 0 / 34%);
             background-blend-mode: darken;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
+            min-height: 100dvh;
         }
 
         /* HEADER FIJO EN LA PARTE SUPERIOR */
         .header-inventario {
-            position: fixed;        /* Lo fija en la pantalla */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background: #f0f2f5;    /* Mismo color de fondo para camuflarse */
+            background: rgba(240, 242, 245, 0.95);
             text-align: center;
-            padding: 16px 0 12px 0;
-            z-index: 150;           /* Capa alta para que todo pase por debajo */
-            box-shadow: 0 4px 10px rgba(240, 242, 245, 0.9); /* Sutil difuminado al hacer scroll */
+            padding: 12px 0 10px 0;
+            z-index: 150;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-        
+
         .header-inventario img {
-            width: 300px;
+            width: 200px;
             max-width: 80%;
             height: auto;
         }
-        
+
         .header-inventario h1 {
-            font-size: 2 rem;
+            font-size: 1.2rem;
             color: #333;
-            margin: 8px 0 0 0;
+            margin: 4px 0 0 0;
             font-weight: 700;
         }
-        
-        /* CONTENEDOR DE PRODUCTOS: Espaciado arriba para que el header fijo no tape las tarjetas */
+
+        /* CONTENEDOR DE PRODUCTOS */
         .contenedor-inventario {
             max-width: 600px;
             width: 100%;
             margin: 0 auto;
-            padding: 160px 16px 40px 16px; /* 160px arriba empuja las tarjetas abajo del header */
+            padding: 120px 16px 40px 16px;
             box-sizing: border-box;
         }
-        
+
         /* Botón flotante de agregar */
         .btn-flotante {
             position: fixed;
@@ -73,11 +76,11 @@
             z-index: 100;
             transition: transform 0.2s;
         }
-        
+
         .btn-flotante:active {
             transform: scale(0.9);
         }
-        
+
         /* Tarjeta de producto */
         .producto-card {
             background: white;
@@ -85,38 +88,38 @@
             margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        
+
         .producto-nombre {
             font-weight: bold;
             font-size: 1rem;
             color: #333;
         }
-        
+
         .producto-stock.bajo {
             color: #e74c3c;
         }
-        
+
         .precio-venta {
             font-weight: bold;
             color: #2ecc71;
         }
-        
+
         .acciones-producto {
             display: flex;
             gap: 8px;
         }
-        
+
         .btn-accion {
             background: none;
             border: none;
             font-size: 1.2rem;
             cursor: pointer;
         }
-        
+
         .btn-editar { color: #3498db; }
         .btn-eliminar { color: #e74c3c; }
-        
-        /* Modal para agregar/editar */
+
+        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -125,15 +128,15 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 200; /* Más alto que el header fijo */
+            z-index: 200;
             justify-content: center;
             align-items: center;
         }
-        
+
         .modal-overlay.abierto {
             display: flex;
         }
-        
+
         .modal {
             background: white;
             border-radius: 24px;
@@ -143,24 +146,24 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        
+
         .modal h2 {
             font-size: 1.2rem;
             margin-bottom: 16px;
             color: #333;
         }
-        
+
         .modal .campo {
             margin-bottom: 12px;
         }
-        
+
         .modal .campo label {
             display: block;
             font-size: 0.75rem;
             color: #888;
             margin-bottom: 4px;
         }
-        
+
         .modal .campo input {
             width: 100%;
             padding: 10px;
@@ -169,18 +172,18 @@
             font-size: 0.9rem;
             box-sizing: border-box;
         }
-        
+
         .modal .campo input:focus {
             outline: none;
             border-color: #FF8533;
         }
-        
+
         .modal .botones-modal {
             display: flex;
             gap: 12px;
             margin-top: 16px;
         }
-        
+
         .modal .btn-guardar {
             flex: 2;
             background: #FF8533;
@@ -191,7 +194,7 @@
             font-weight: bold;
             cursor: pointer;
         }
-        
+
         .modal .btn-cancelar {
             flex: 1;
             background: #e74c3c;
@@ -202,24 +205,24 @@
             font-weight: bold;
             cursor: pointer;
         }
-        
+
         .sin-productos {
             text-align: center;
             padding: 40px;
             color: #aaa;
             font-size: 0.9rem;
         }
-        
+
         .stock-bajo {
             background: #fde8e8 !important;
         }
-        
+
         .loading {
             text-align: center;
             padding: 40px;
             color: #aaa;
         }
-        
+
         .btn-volver-menu {
             background: #7f8c8d;
             width: 100%;
@@ -233,7 +236,7 @@
             margin-top: 20px;
             transition: background 0.2s;
         }
-        
+
         .btn-volver-menu:active {
             background: #6c7a7a;
             transform: scale(0.98);
