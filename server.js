@@ -16,6 +16,19 @@ mongoose.connect(process.env.MONGO_URI)
 const clienteSchema = new mongoose.Schema({}, { strict: false });
 const Cliente = mongoose.model('Cliente', clienteSchema);
 
+// ============================================================
+// MODELO DE INVENTARIO
+// ============================================================
+const inventarioSchema = new mongoose.Schema({
+    nombre: { type: String, required: true },
+    costo: { type: Number, required: true },
+    precioVenta: { type: Number, required: true },
+    stock: { type: Number, required: true, default: 0 },
+    proveedor: { type: String, default: '' },
+    fechaCreacion: { type: Date, default: Date.now }
+});
+const Inventario = mongoose.model('Inventario', inventarioSchema);
+
 const servidor = http.createServer(async (req, res) => {
     // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
