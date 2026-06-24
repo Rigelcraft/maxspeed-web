@@ -92,6 +92,95 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
+    // ============================================================
+    // RUTAS PARA INVENTARIO
+    // ============================================================
+
+    // Obtener todos los productos del inventario
+    else if (req.method === 'GET' && req.url === '/obtener-inventario') {
+        try {
+            const productos = await Inventario.find({});
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(productos));
+        } catch (error) {
+            console.error("Error obteniendo inventario:", error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: "Error al obtener inventario" }));
+        }
+    }
+
+    // Guardar nuevo producto
+    else if (req.method === 'POST' && req.url === '/guardar-producto') {
+        let cuerpo = '';
+        req.on('data', pedacito => { cuerpo += pedacito; });
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(cuerpo);
+                const nuevoProducto = new Inventario({
+                    nombre: datos.nombre,
+                    costo: datos.costo,
+                    precioVenta: datos.precioVenta,
+                    stock: datos.stock,
+                    proveedor: datos.proveedor || ''
+                });
+                await nuevoProducto.save();
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ mensaje: "Producto guardado correctamente" }));
+            } catch (error) {
+                console.error("Error guardando producto:", error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: "Error al guardar producto" }));
+            }
+        });
+    }
+
+    // Actualizar producto existente
+    else if (req.method === 'POST' && req.url === '/actualizar-producto') {
+        let cuerpo = '';
+        req.on('data', pedacito => { cuerpo += pedacito; });
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(cuerpo);
+                await Inventario.updateOne(
+                    { _id: datos._id },
+                    {
+                        $set: {
+                            nombre: datos.nombre,
+                            costo: datos.costo,
+                            precioVenta: datos.precioVenta,
+                            stock: datos.stock,
+                            proveedor: datos.proveedor || ''
+                        }
+                    }
+                );
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ mensaje: "Producto actualizado correctamente" }));
+            } catch (error) {
+                console.error("Error actualizando producto:", error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: "Error al actualizar producto" }));
+            }
+        });
+    }
+
+    // Eliminar producto
+    else if (req.method === 'POST' && req.url === '/eliminar-producto') {
+        let cuerpo = '';
+        req.on('data', pedacito => { cuerpo += pedacito; });
+        req.on('end', async () => {
+            try {
+                const { _id } = JSON.parse(cuerpo);
+                await Inventario.deleteOne({ _id: _id });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ mensaje: "Producto eliminado correctamente" }));
+            } catch (error) {
+                console.error("Error eliminando producto:", error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: "Error al eliminar producto" }));
+            }
+        });
+    }
+
     // -------------------------------------------------------------
     // RUTA: VALIDACIÓN DE PIN
     // -------------------------------------------------------------
