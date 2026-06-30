@@ -12,13 +12,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Conectado a MongoDB Atlas'))
   .catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
 
-// MODELO
+// MODELO DE CLIENTE
 const clienteSchema = new mongoose.Schema({}, { strict: false });
 const Cliente = mongoose.model('Cliente', clienteSchema);
 
-// ============================================================
 // MODELO DE INVENTARIO
-// ============================================================
 const inventarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     costo: { type: Number, required: true },
@@ -65,7 +63,7 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     // -------------------------------------------------------------
-    // RUTA: GUARDAR CLIENTE (NO GENERA PIN NUEVO)
+    // RUTA: GUARDAR CLIENTE (CON DESCUENTO DE STOCK)
     // -------------------------------------------------------------
     else if (req.method === 'POST' && req.url === '/guardar-cliente') {
         let cuerpo = '';
@@ -79,7 +77,7 @@ const servidor = http.createServer(async (req, res) => {
                     nuevoRegistro.cedulaRuc = nuevoRegistro.cedulaRuc.toString().trim();
                 }
 
-                // VALIDAR que el PIN venga del frontend (NO lo generamos aquí)
+                // VALIDAR que el PIN venga del frontend
                 if (!nuevoRegistro.pinCliente || nuevoRegistro.pinCliente.toString().trim() === "") {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: "El PIN es obligatorio. Debe generarse en el formulario." }));
@@ -87,6 +85,38 @@ const servidor = http.createServer(async (req, res) => {
                 }
 
                 nuevoRegistro.pinCliente = nuevoRegistro.pinCliente.toString().trim();
+
+                // ============================================================
+                // DESCONTAR STOCK DE REPUESTOS
+                // ============================================================
+                if (nuevoRegistro.repuestos && nuevoRegistro.repuestos.length > 0) {
+                    for (const repuesto of nuevoRegistro.repuestos) {
+                        // Solo descontar si NO está marcado "noDescontar" y tiene descripción
+                        if (!repuesto.noDescontar && repuesto.descripcion && repuesto.descripcion.trim() !== "") {
+                            // Buscar el producto por nombre exacto
+                            const producto = await Inventario.findOne({ 
+                                nombre: repuesto.descripcion.trim()
+                            });
+                            
+                            if (producto) {
+                                // Verificar que haya stock suficiente
+                                if (producto.stock > 0) {
+                                    await Inventario.updateOne(
+                                        { _id: producto._id },
+                                        { $inc: { stock: -1 } }
+                                    );
+                                    console.log(`📦 Stock descontado: ${producto.nombre} (${producto.stock - 1} restantes)`);
+                                } else {
+                                    console.log(`⚠️ Stock insuficiente para: ${producto.nombre} (${producto.stock} disponibles)`);
+                                }
+                            } else {
+                                console.log(`ℹ️ Producto no encontrado en inventario: "${repuesto.descripcion}"`);
+                            }
+                        } else if (repuesto.noDescontar) {
+                            console.log(`ℹ️ No se descuenta stock: "${repuesto.descripcion}" (marcado como no descontar)`);
+                        }
+                    }
+                }
 
                 // Guardar en MongoDB
                 const nuevoDoc = new Cliente(nuevoRegistro);
@@ -98,7 +128,7 @@ const servidor = http.createServer(async (req, res) => {
                     pin: nuevoRegistro.pinCliente 
                 }));
             } catch (e) {
-                console.error(e);
+                console.error("❌ Error en /guardar-cliente:", e);
                 res.writeHead(500);
                 res.end(JSON.stringify({ error: "Error al guardar en el servidor" }));
             }

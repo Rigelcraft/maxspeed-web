@@ -250,6 +250,23 @@
             box-sizing: border-box;
             resize: vertical;
         }
+        
+        /* ESTILO PARA EL CHECKBOX DE REPUESTOS */
+        .fila-repuesto-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+        
+        .fila-repuesto-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -269,6 +286,14 @@
             <div class="campo">
                 <label for="fecha-salida">FECHA DE SALIDA</label>
                 <input type="date" id="fecha-salida">
+            </div>
+            
+            <!-- ============================================================ -->
+            <!-- NUEVO: KILOMETRAJE -->
+            <!-- ============================================================ -->
+            <div class="campo">
+                <label for="kilometraje">KILOMETRAJE (km)</label>
+                <input type="number" id="kilometraje" placeholder="Ej. 45200">
             </div>
                                     
             <div class="campo">
@@ -411,6 +436,15 @@
                     <input type="text" list="lista-repuestos" placeholder="Ej. Filtro de aire" class="input-repuesto">
                     <input type="number" placeholder="PVP $" class="input-precio" title="Precio al cliente" oninput="calcularTotal()">
                     <input type="number" placeholder="Desc %" class="input-descuento" title="Descuento de distribuidora (Oculto al cliente)">
+                    
+                    <!-- ============================================================ -->
+                    <!-- NUEVO: CHECKBOX "No descontar stock" -->
+                    <!-- ============================================================ -->
+                    <div class="fila-repuesto-checkbox">
+                        <input type="checkbox" class="checkbox-no-stock" id="no-stock-check">
+                        <label for="no-stock-check">No descontar stock (cliente trajo el repuesto)</label>
+                    </div>
+                    
                     <button type="button" class="btn-pequeno" onclick="agregarFila('contenedor-repuestos', 'repuesto')">+</button>
                 </div>
             </div>
@@ -576,6 +610,10 @@
                     <input type="text" list="lista-repuestos" placeholder="Otro repuesto..." class="input-repuesto">
                     <input type="number" placeholder="PVP $" class="input-precio" oninput="calcularTotal()">
                     <input type="number" placeholder="Desc %" class="input-descuento">
+                    <div class="fila-repuesto-checkbox">
+                        <input type="checkbox" class="checkbox-no-stock">
+                        <label>No descontar stock (cliente trajo el repuesto)</label>
+                    </div>
                     <button type="button" class="btn-accion" onclick="this.parentElement.remove(); calcularTotal();">×</button>
                 `;
             }
@@ -702,21 +740,31 @@
                 return;
             }
 
+            // ============================================================
+            // NUEVO: Obtener kilometraje
+            // ============================================================
+            const kilometraje = document.getElementById('kilometraje').value || '';
+
             const trabajos = Array.from(document.querySelectorAll('#contenedor-trabajos .fila-dinamica')).map(fila => ({
                 descripcion: fila.querySelector('.input-trabajo').value,
                 precio: fila.querySelector('.input-precio').value
             }));
 
-            const repuestos = Array.from(document.querySelectorAll('#contenedor-repuestos .fila-dinamica')).map(fila => ({
-                descripcion: fila.querySelector('.input-repuesto').value,
-                pvp: fila.querySelector('.input-precio').value,
-                descuento: fila.querySelector('.input-descuento').value
-            }));
+            const repuestos = Array.from(document.querySelectorAll('#contenedor-repuestos .fila-dinamica')).map(fila => {
+                const checkbox = fila.querySelector('.checkbox-no-stock');
+                return {
+                    descripcion: fila.querySelector('.input-repuesto').value,
+                    pvp: fila.querySelector('.input-precio').value,
+                    descuento: fila.querySelector('.input-descuento').value,
+                    noDescontar: checkbox ? checkbox.checked : false // ← NUEVO
+                };
+            });
 
             const registroCompleto = {
                 pinCliente: document.getElementById('pin-cliente').value,
                 fechaIngreso: document.getElementById('fecha-ingreso').value,
                 fechaSalida: document.getElementById('fecha-salida').value,
+                kilometraje: kilometraje, // ← NUEVO
                 cliente: nombreCliente,
                 cedulaRuc: document.getElementById('cedula').value,
                 telefono: document.getElementById('telefono').value,
@@ -745,7 +793,7 @@
             .then(respuesta => respuesta.json())
             .then(data => {
                 alert("🎉 " + data.mensaje);
-                window.location.href = "explorador.html";  // ← REDIRIGE AL EXPLORADOR
+                window.location.href = "explorador.html";
             })
             .catch(error => {
                 console.error("Error al enviar los datos:", error);
