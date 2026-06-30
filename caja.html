@@ -375,6 +375,7 @@
                 <button class="tipo-btn activo" data-tipo="mes">📅 Por Mes</button>
                 <button class="tipo-btn" data-tipo="semana">📆 Por Semana</button>
                 <button class="tipo-btn" data-tipo="dia">📅 Por Día</button>
+                <button class="tipo-btn" data-tipo="anio">🗓️ Por Año</button>
             </div>
 
             <div id="selectores-mes" class="selector-filas">
@@ -418,6 +419,13 @@
                 <div class="selector-grupo">
                     <label>📅 Seleccionar día</label>
                     <input type="date" id="selectorFechaDia" class="selector-desplegable">
+                </div>
+            </div>
+
+            <div id="selectores-anio" class="selector-filas" style="display: none;">
+                <div class="selector-grupo">
+                    <label>🗓️ Seleccionar año</label>
+                    <select id="selectorAnioVista" class="selector-desplegable"></select>
                 </div>
             </div>
         </div>
@@ -519,11 +527,12 @@
 
             function cambiarTipoVista(tipo) {
                 tipoVistaActual = tipo;
-                window.tipoVistaActual = tipo; 
+                window.tipoVistaActual = tipo;
                 
                 document.getElementById('selectores-mes').style.display = tipo === "mes" ? "flex" : "none";
                 document.getElementById('selectores-semana').style.display = tipo === "semana" ? "flex" : "none";
                 document.getElementById('selectores-dia').style.display = tipo === "dia" ? "flex" : "none";
+                document.getElementById('selectores-anio').style.display = tipo === "anio" ? "flex" : "none";  // ← NUEVO
                 
                 document.querySelectorAll('.tipo-btn').forEach(btn => {
                     if (btn.dataset.tipo === tipo) {
@@ -546,6 +555,7 @@
             document.getElementById('selectorMes').addEventListener('change', () => actualizarVista());
             document.getElementById('selectorSemana').addEventListener('change', () => actualizarVista());
             document.getElementById('selectorFechaDia').addEventListener('change', () => actualizarVista());
+            document.getElementById('selectorAnioVista').addEventListener('change', () => actualizarVista());
 
             document.querySelectorAll('.modulo-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -558,23 +568,26 @@
             
             window.tipoVistaActual = tipoVistaActual;
             actualizarVista();
-
             function generarAnios() {
                 const selectorAnio = document.getElementById('selectorAnio');
+                const selectorAnioVista = document.getElementById('selectorAnioVista');
                 const añoActual = new Date().getFullYear();
-                const añoInicio = 2024;
+                const añoInicio = 2016;
                 const añoFin = añoActual + 5;
                 
-                selectorAnio.innerHTML = '';
-                for (let año = añoInicio; año <= añoFin; año++) {
-                    const option = document.createElement('option');
-                    option.value = año;
-                    option.textContent = año;
-                    if (año === añoActual) {
-                        option.selected = true;
+                [selectorAnio, selectorAnioVista].forEach(selector => {
+                    if (!selector) return;
+                    selector.innerHTML = '';
+                    for (let año = añoInicio; año <= añoFin; año++) {
+                        const option = document.createElement('option');
+                        option.value = año;
+                        option.textContent = año;
+                        if (año === añoActual) {
+                            option.selected = true;
+                        }
+                        selector.appendChild(option);
                     }
-                    selectorAnio.appendChild(option);
-                }
+                });
             }
         });
         
@@ -637,15 +650,27 @@
             const mes = parseInt(document.getElementById('selectorMes').value) || 0;
             const semanaOffset = parseInt(document.getElementById('selectorSemana').value) || 0;
             const fechaDia = document.getElementById('selectorFechaDia').value;
+            const anioVista = parseInt(document.getElementById('selectorAnioVista').value) || new Date().getFullYear(); // ← NUEVO
             const tVista = window.tipoVistaActual || "mes";
             
+            // ============================================================
+            // NUEVO: Vista POR AÑO
+            // ============================================================
+            if (tVista === "anio") {
+                inicio = new Date(anioVista, 0, 1);
+                fin = new Date(anioVista, 11, 31, 23, 59, 59);
+                descripcion = `Año ${anioVista}`;
+                return { inicio, fin, descripcion };
+            }
+            
+            // Vista por DÍA
             if (tVista === "dia" && fechaDia) {
                 inicio = new Date(fechaDia + 'T00:00:00');
                 fin = new Date(fechaDia + 'T23:59:59');
                 descripcion = `${inicio.toLocaleDateString('es-ES')}`;
                 return { inicio, fin, descripcion };
             }
-            
+    
             if (tVista === "semana") {
                 const hoy = new Date();
                 const diaSemana = hoy.getDay();
