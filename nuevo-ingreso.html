@@ -288,9 +288,7 @@
                 <input type="date" id="fecha-salida">
             </div>
             
-            <!-- ============================================================ -->
-            <!-- NUEVO: KILOMETRAJE -->
-            <!-- ============================================================ -->
+            <!-- KILOMETRAJE -->
             <div class="campo">
                 <label for="kilometraje">KILOMETRAJE (km)</label>
                 <input type="number" id="kilometraje" placeholder="Ej. 45200">
@@ -396,38 +394,7 @@
             </div>
             
             <datalist id="lista-trabajos">
-                <option value="Cambio de Aceite y Filtro de Motor">
-                <option value="Cambio de Aceite de Caja de Cambios (Manual/Automática)">
-                <option value="Cambio de Aceite de Diferencial">
-                <option value="Cambio de Filtro de Aire de Motor">
-                <option value="Cambio de Filtro de Aire de Cabina (A/C)">
-                <option value="Cambio de Filtro de Combustible">
-                <option value="ABC de Frenos (Limpieza y Regulación)">
-                <option value="Cambio de Pastillas de Freno">
-                <option value="Cambio de Discos de Freno">
-                <option value="Cambio de Zapatas / Tambores Traseros">
-                <option value="Rectificación de Discos / Tambores">
-                <option value="Cambio de Líquido de Frenos y Purga">
-                <option value="ABC de Motor (Afinamiento Completo)">
-                <option value="Limpieza y Calibración de Inyectores (Ultrasonido)">
-                <option value="Cambio de Bujías">
-                <option value="Limpieza de Cuerpo de Aceleración">
-                <option value="Cambio de Kit de Distribución (Banda/Cadena)">
-                <option value="Cambio de Banda de Accesorios (Alternador/Aire)">
-                <option value="Cambio de Empaque de Tapa de Válvulas">
-                <option value="Medición de Compresión del Motor">
-                <option value="Revisión y Ajuste de Suspensión">
-                <option value="Cambio de Amortiguadores (Delanteros/Traseros)">
-                <option value="Cambio de Mesas / Bocines de Suspensión">
-                <option value="Cambio de Terminales de Dirección / Rótulas">
-                <option value="Cambio de Rodamientos de Rueda (Rulimanes)">
-                <option value="Cambio de Juntas Homocinéticas / Lados">
-                <option value="Diagnóstico con Escáner Automotriz (Borrado de Códigos)">
-                <option value="Chequeo de Batería y Sistema de Carga">
-                <option value="Mantenimiento / Cambio de Alternador">
-                <option value="Mantenimiento / Cambio de Motor de Arranque">
-                <option value="Recarga de Gas de Aire Acondicionado">
-                <option value="Cambio de Focos / Luces del Sistema Eléctrico">
+                <!-- Se llena con JavaScript -->
             </datalist>
             
             <div class="campo" id="contenedor-repuestos" style="margin-top: 10px;">
@@ -437,9 +404,6 @@
                     <input type="number" placeholder="PVP $" class="input-precio" title="Precio al cliente" oninput="calcularTotal()">
                     <input type="number" placeholder="Desc %" class="input-descuento" title="Descuento de distribuidora (Oculto al cliente)">
                     
-                    <!-- ============================================================ -->
-                    <!-- NUEVO: CHECKBOX "No descontar stock" -->
-                    <!-- ============================================================ -->
                     <div class="fila-repuesto-checkbox">
                         <input type="checkbox" class="checkbox-no-stock" id="no-stock-check">
                         <label for="no-stock-check">No descontar stock (cliente trajo el repuesto)</label>
@@ -450,30 +414,7 @@
             </div>
                                 
             <datalist id="lista-repuestos">
-                <option value="Aceite de Motor 10W30 (Galón)">
-                <option value="Aceite de Motor 20W50 (Galón)">
-                <option value="Aceite de Motor 5W30 (Sintético)">
-                <option value="Aceite de Transmisión / Caja">
-                <option value="Líquido de Frenos DOT 4">
-                <option value="Líquido Refrigerante (Anticongelante)">
-                <option value="Filtro de Aceite de Motor">
-                <option value="Filtro de Aire de Motor">
-                <option value="Filtro de Combustible (Gasolina/Diésel)">
-                <option value="Filtro de Aire de Cabina (A/C)">
-                <option value="Bujías de Encendido (Juego)">
-                <option value="Pastillas de Freno Delanteras">
-                <option value="Pastillas de Freno Traseras">
-                <option value="Banda de Distribución">
-                <option value="Banda de Alternador">
-                <option value="Empaque de Tapa de Válvulas">
-                <option value="Silicona RTV / Empacadura Gris">
-                <option value="Limpia Carburador / Cuerpo Aceleración (Spray)">
-                <option value="Amortiguadores Delanteros (Par)">
-                <option value="Amortiguadores Traseros (Par)">
-                <option value="Rótulas de Suspensión">
-                <option value="Terminales de Dirección">
-                <option value="Batería Automotriz">
-                <option value="Focos de Faro Principal (H4/H7)">
+                <!-- Se llena con JavaScript -->
             </datalist>
                                 
             <hr class="divisor-seccion">
@@ -633,12 +574,152 @@
             document.getElementById('total-final').textContent = total.toFixed(2);
         }
 
-        // PIN de EXACTAMENTE 6 dígitos
+        // ============================================================
+        // GESTIÓN DE LISTAS DINÁMICAS (guardadas en localStorage)
+        // ============================================================
+
+        // Obtener lista de repuestos desde localStorage o usar la predeterminada
+        function obtenerListaRepuestos() {
+            const guardada = localStorage.getItem('listaRepuestosPersonalizada');
+            if (guardada) {
+                return JSON.parse(guardada);
+            }
+            // Lista predeterminada
+            return [
+                "Aceite de Motor 10W30 (Galón)",
+                "Aceite de Motor 20W50 (Galón)",
+                "Aceite de Motor 5W30 (Sintético)",
+                "Aceite de Transmisión / Caja",
+                "Líquido de Frenos DOT 4",
+                "Líquido Refrigerante (Anticongelante)",
+                "Filtro de Aceite de Motor",
+                "Filtro de Aire de Motor",
+                "Filtro de Combustible (Gasolina/Diésel)",
+                "Filtro de Aire de Cabina (A/C)",
+                "Bujías de Encendido (Juego)",
+                "Pastillas de Freno Delanteras",
+                "Pastillas de Freno Traseras",
+                "Banda de Distribución",
+                "Banda de Alternador",
+                "Empaque de Tapa de Válvulas",
+                "Silicona RTV / Empacadura Gris",
+                "Limpia Carburador / Cuerpo Aceleración (Spray)",
+                "Amortiguadores Delanteros (Par)",
+                "Amortiguadores Traseros (Par)",
+                "Rótulas de Suspensión",
+                "Terminales de Dirección",
+                "Batería Automotriz",
+                "Focos de Faro Principal (H4/H7)"
+            ];
+        }
+
+        // Obtener lista de trabajos desde localStorage o usar la predeterminada
+        function obtenerListaTrabajos() {
+            const guardada = localStorage.getItem('listaTrabajosPersonalizada');
+            if (guardada) {
+                return JSON.parse(guardada);
+            }
+            // Lista predeterminada
+            return [
+                "Cambio de Aceite y Filtro de Motor",
+                "Cambio de Aceite de Caja de Cambios (Manual/Automática)",
+                "Cambio de Aceite de Diferencial",
+                "Cambio de Filtro de Aire de Motor",
+                "Cambio de Filtro de Aire de Cabina (A/C)",
+                "Cambio de Filtro de Combustible",
+                "ABC de Frenos (Limpieza y Regulación)",
+                "Cambio de Pastillas de Freno",
+                "Cambio de Discos de Freno",
+                "Cambio de Zapatas / Tambores Traseros",
+                "Rectificación de Discos / Tambores",
+                "Cambio de Líquido de Frenos y Purga",
+                "ABC de Motor (Afinamiento Completo)",
+                "Limpieza y Calibración de Inyectores (Ultrasonido)",
+                "Cambio de Bujías",
+                "Limpieza de Cuerpo de Aceleración",
+                "Cambio de Kit de Distribución (Banda/Cadena)",
+                "Cambio de Banda de Accesorios (Alternador/Aire)",
+                "Cambio de Empaque de Tapa de Válvulas",
+                "Medición de Compresión del Motor",
+                "Revisión y Ajuste de Suspensión",
+                "Cambio de Amortiguadores (Delanteros/Traseros)",
+                "Cambio de Mesas / Bocines de Suspensión",
+                "Cambio de Terminales de Dirección / Rótulas",
+                "Cambio de Rodamientos de Rueda (Rulimanes)",
+                "Cambio de Juntas Homocinéticas / Lados",
+                "Diagnóstico con Escáner Automotriz (Borrado de Códigos)",
+                "Chequeo de Batería y Sistema de Carga",
+                "Mantenimiento / Cambio de Alternador",
+                "Mantenimiento / Cambio de Motor de Arranque",
+                "Recarga de Gas de Aire Acondicionado",
+                "Cambio de Focos / Luces del Sistema Eléctrico"
+            ];
+        }
+
+        // Guardar listas en localStorage
+        function guardarListaRepuestos(lista) {
+            localStorage.setItem('listaRepuestosPersonalizada', JSON.stringify(lista));
+        }
+
+        function guardarListaTrabajos(lista) {
+            localStorage.setItem('listaTrabajosPersonalizada', JSON.stringify(lista));
+        }
+
+        // Actualizar el datalist de repuestos en el DOM
+        function actualizarDatalistRepuestos() {
+            const lista = obtenerListaRepuestos();
+            const datalist = document.getElementById('lista-repuestos');
+            if (!datalist) return;
+            datalist.innerHTML = '';
+            lista.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                datalist.appendChild(option);
+            });
+        }
+
+        // Actualizar el datalist de trabajos en el DOM
+        function actualizarDatalistTrabajos() {
+            const lista = obtenerListaTrabajos();
+            const datalist = document.getElementById('lista-trabajos');
+            if (!datalist) return;
+            datalist.innerHTML = '';
+            lista.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                datalist.appendChild(option);
+            });
+        }
+
+        // Agregar un nuevo repuesto a la lista (si no existe)
+        function agregarRepuestoALista(nuevo) {
+            if (!nuevo || nuevo.trim() === '') return;
+            const lista = obtenerListaRepuestos();
+            if (!lista.includes(nuevo.trim())) {
+                lista.push(nuevo.trim());
+                guardarListaRepuestos(lista);
+                actualizarDatalistRepuestos();
+            }
+        }
+
+        // Agregar un nuevo trabajo a la lista (si no existe)
+        function agregarTrabajoALista(nuevo) {
+            if (!nuevo || nuevo.trim() === '') return;
+            const lista = obtenerListaTrabajos();
+            if (!lista.includes(nuevo.trim())) {
+                lista.push(nuevo.trim());
+                guardarListaTrabajos(lista);
+                actualizarDatalistTrabajos();
+            }
+        }
+
+        // ============================================================
+        // PIN
+        // ============================================================
         function generarPinAleatorio() {
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        // Función para verificar si un PIN ya existe en la BD (evitar duplicados)
         async function pinExiste(pin) {
             try {
                 const response = await fetch(`/verificar-pin?pin=${pin}`);
@@ -650,7 +731,6 @@
             }
         }
 
-        // Generar PIN único de 6 dígitos
         async function generarPinUnico() {
             let nuevoPin = generarPinAleatorio();
             let contador = 0;
@@ -661,11 +741,17 @@
             return nuevoPin;
         }
 
+        // ============================================================
         // Cargar clientes existentes y determinar si es nuevo o no
+        // ============================================================
         let clienteExistenteCompleto = null;
         let listaClientesGlobal = [];
 
         document.addEventListener("DOMContentLoaded", async () => {
+            // INICIALIZAR LISTAS DINÁMICAS
+            actualizarDatalistRepuestos();
+            actualizarDatalistTrabajos();
+            
             // Cargar lista de clientes
             try {
                 const respuesta = await fetch('/obtener-clientes');
@@ -725,6 +811,9 @@
             }
         });
 
+        // ============================================================
+        // GUARDAR REGISTRO
+        // ============================================================
         function procesarGuardado() {
             const nombreCliente = document.getElementById('nombre').value.trim();
             const placaVehiculo = document.getElementById('placas').value.trim();
@@ -740,9 +829,6 @@
                 return;
             }
 
-            // ============================================================
-            // NUEVO: Obtener kilometraje
-            // ============================================================
             const kilometraje = document.getElementById('kilometraje').value || '';
 
             const trabajos = Array.from(document.querySelectorAll('#contenedor-trabajos .fila-dinamica')).map(fila => ({
@@ -756,15 +842,30 @@
                     descripcion: fila.querySelector('.input-repuesto').value,
                     pvp: fila.querySelector('.input-precio').value,
                     descuento: fila.querySelector('.input-descuento').value,
-                    noDescontar: checkbox ? checkbox.checked : false // ← NUEVO
+                    noDescontar: checkbox ? checkbox.checked : false
                 };
+            });
+
+            // ============================================================
+            // Guardar trabajos y repuestos nuevos en las listas
+            // ============================================================
+            trabajos.forEach(t => {
+                if (t.descripcion && t.descripcion.trim() !== '') {
+                    agregarTrabajoALista(t.descripcion);
+                }
+            });
+
+            repuestos.forEach(r => {
+                if (r.descripcion && r.descripcion.trim() !== '') {
+                    agregarRepuestoALista(r.descripcion);
+                }
             });
 
             const registroCompleto = {
                 pinCliente: document.getElementById('pin-cliente').value,
                 fechaIngreso: document.getElementById('fecha-ingreso').value,
                 fechaSalida: document.getElementById('fecha-salida').value,
-                kilometraje: kilometraje, // ← NUEVO
+                kilometraje: kilometraje,
                 cliente: nombreCliente,
                 cedulaRuc: document.getElementById('cedula').value,
                 telefono: document.getElementById('telefono').value,
