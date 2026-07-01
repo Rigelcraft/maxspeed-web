@@ -755,15 +755,29 @@
             const items = filtrarPorModuloYFecha();
             
             // ============================================================
-            // NUEVO: Calcular ingresos, costo y ganancia real
+            // CALCULAR INGRESOS, COSTO Y GANANCIA REAL
             // ============================================================
             const totalIngresos = items.reduce((sum, t) => sum + t.precio, 0);
             const totalCosto = items.reduce((sum, t) => sum + (t.costoRepuestos || 0), 0);
             const totalGananciaReal = items.reduce((sum, t) => sum + (t.gananciaReal || 0), 0);
             const promedio = items.length > 0 ? totalIngresos / items.length : 0;
-            const gananciaPorDiaTotal = items.reduce((sum, t) => sum + (t.gananciaPorDia || 0), 0);
+            
+            // ============================================================
+            // NUEVO: Ganancia por día REAL (usando ganancia_real, no precio)
+            // ============================================================
+            const gananciaPorDiaTotal = items.reduce((sum, t) => {
+                const gananciaDiaria = t.diasDuracion > 0 ? (t.gananciaReal || 0) / t.diasDuracion : 0;
+                return sum + gananciaDiaria;
+            }, 0);
+            
             const maxDias = items.length > 0 ? Math.max(...items.map(t => t.diasDuracion || 1)) : 0;
             const totalDias = items.reduce((sum, t) => sum + (t.diasDuracion || 1), 0);
+            
+            // ============================================================
+            // NUEVO: Total de días del período seleccionado
+            // ============================================================
+            const { inicio, fin } = obtenerRangoFecha();
+            const totalDiasPeriodo = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
             
             document.getElementById('listaTitulo').textContent = "📋 Últimos trabajos";
             document.getElementById('totalLabel').textContent = "💰 GANANCIA REAL (ingresos - costo repuestos)";
@@ -773,9 +787,13 @@
             document.getElementById('totalTrabajos').textContent = items.length;
             document.getElementById('totalIngresos').textContent = `$${totalIngresos.toFixed(2)}`;
             document.getElementById('promedioTrabajo').textContent = `$${promedio.toFixed(2)}`;
+            
+            // ============================================================
+            // NUEVO: Ganancia por día REAL (basada en ganancia real)
+            // ============================================================
             document.getElementById('gananciaPorDia').textContent = `$${gananciaPorDiaTotal.toFixed(2)}`;
             document.getElementById('trabajoMasLargo').textContent = maxDias;
-            document.getElementById('totalDiasTrabajo').textContent = totalDias;
+            document.getElementById('totalDiasTrabajo').textContent = totalDiasPeriodo;
             
             const contenedor = document.getElementById('listaTrabajos');
             if (items.length === 0) {
@@ -792,7 +810,7 @@
                     </div>
                     <div class="trabajo-desc">🔧 ${escapeHtml(t.descripcion)} (${escapeHtml(t.vehiculo)})</div>
                     <div class="flex-between">
-                        <span class="ganancia-diaria">⏱️ ${t.diasDuracion} día(s) - $${t.gananciaPorDia.toFixed(2)}/día</span>
+                        <span class="ganancia-diaria">⏱️ ${t.diasDuracion} día(s) - $${(t.diasDuracion > 0 ? (t.gananciaReal || 0) / t.diasDuracion : 0).toFixed(2)}/día</span>
                         <span class="precio">💰 $${t.precio.toFixed(2)}</span>
                     </div>
                     <div style="font-size:0.65rem; color:#888; margin-top:4px;">
