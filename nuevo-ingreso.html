@@ -575,42 +575,12 @@
         }
 
         // ============================================================
-        // GESTIÓN DE LISTAS DINÁMICAS (guardadas en localStorage)
+        // GESTIÓN DE LISTAS DINÁMICAS
         // ============================================================
 
-        // Obtener lista de repuestos desde localStorage o usar la predeterminada
+        // Obtener lista de repuestos - SOLO DEL INVENTARIO
         function obtenerListaRepuestos() {
-            const guardada = localStorage.getItem('listaRepuestosPersonalizada');
-            if (guardada) {
-                return JSON.parse(guardada);
-            }
-            // Lista predeterminada
-            return [
-                "Aceite de Motor 10W30 (Galón)",
-                "Aceite de Motor 20W50 (Galón)",
-                "Aceite de Motor 5W30 (Sintético)",
-                "Aceite de Transmisión / Caja",
-                "Líquido de Frenos DOT 4",
-                "Líquido Refrigerante (Anticongelante)",
-                "Filtro de Aceite de Motor",
-                "Filtro de Aire de Motor",
-                "Filtro de Combustible (Gasolina/Diésel)",
-                "Filtro de Aire de Cabina (A/C)",
-                "Bujías de Encendido (Juego)",
-                "Pastillas de Freno Delanteras",
-                "Pastillas de Freno Traseras",
-                "Banda de Distribución",
-                "Banda de Alternador",
-                "Empaque de Tapa de Válvulas",
-                "Silicona RTV / Empacadura Gris",
-                "Limpia Carburador / Cuerpo Aceleración (Spray)",
-                "Amortiguadores Delanteros (Par)",
-                "Amortiguadores Traseros (Par)",
-                "Rótulas de Suspensión",
-                "Terminales de Dirección",
-                "Batería Automotriz",
-                "Focos de Faro Principal (H4/H7)"
-            ];
+            return inventarioProductos.map(p => p.nombre);
         }
 
         // Obtener lista de trabajos desde localStorage o usar la predeterminada
@@ -619,7 +589,6 @@
             if (guardada) {
                 return JSON.parse(guardada);
             }
-            // Lista predeterminada
             return [
                 "Cambio de Aceite y Filtro de Motor",
                 "Cambio de Aceite de Caja de Cambios (Manual/Automática)",
@@ -656,29 +625,26 @@
             ];
         }
 
-        // Guardar listas en localStorage
-        function guardarListaRepuestos(lista) {
-            localStorage.setItem('listaRepuestosPersonalizada', JSON.stringify(lista));
-        }
-
         function guardarListaTrabajos(lista) {
             localStorage.setItem('listaTrabajosPersonalizada', JSON.stringify(lista));
         }
 
-        // Actualizar el datalist de repuestos en el DOM
+        // Actualizar el datalist de repuestos - SOLO INVENTARIO
         function actualizarDatalistRepuestos() {
-            const lista = obtenerListaRepuestos();
             const datalist = document.getElementById('lista-repuestos');
             if (!datalist) return;
             datalist.innerHTML = '';
-            lista.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item;
-                datalist.appendChild(option);
-            });
+            
+            if (inventarioProductos && inventarioProductos.length > 0) {
+                inventarioProductos.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.nombre;
+                    datalist.appendChild(option);
+                });
+            }
         }
 
-        // Actualizar el datalist de trabajos en el DOM
+        // Actualizar el datalist de trabajos
         function actualizarDatalistTrabajos() {
             const lista = obtenerListaTrabajos();
             const datalist = document.getElementById('lista-trabajos');
@@ -691,15 +657,10 @@
             });
         }
 
-        // Agregar un nuevo repuesto a la lista (si no existe)
+        // Agregar un nuevo repuesto - YA NO SE GUARDA EN LOCALSTORAGE
         function agregarRepuestoALista(nuevo) {
-            if (!nuevo || nuevo.trim() === '') return;
-            const lista = obtenerListaRepuestos();
-            if (!lista.includes(nuevo.trim())) {
-                lista.push(nuevo.trim());
-                guardarListaRepuestos(lista);
-                actualizarDatalistRepuestos();
-            }
+            // Los repuestos solo vienen del inventario
+            return;
         }
 
         // Agregar un nuevo trabajo a la lista (si no existe)
