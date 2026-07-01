@@ -431,7 +431,7 @@
         </div>
 
         <div class="card-total">
-            <div class="label" id="totalLabel">💰 TOTAL DEL PERÍODO</div>
+            <div class="label" id="totalLabel">💰 GANANCIA REAL (ingresos - costo repuestos)</div>
             <div class="amount" id="totalAcumulado">$0</div>
             <div class="sub" id="periodoDescripcion">(Este mes)</div>
         </div>
@@ -489,6 +489,7 @@
         let datosOriginales = [];
         let moduloActual = "taller";
         let periodoActual = "mes";
+        let inventarioProductos = [];
 
         function calcularDias(fechaIngreso, fechaSalida) {
             if (!fechaIngreso || !fechaSalida) return 1;
@@ -513,9 +514,20 @@
                 return;
             }
             
+            // ============================================================
+            // NUEVO: CARGAR INVENTARIO PRIMERO
+            // ============================================================
+            try {
+                const res = await fetch('/obtener-inventario');
+                inventarioProductos = await res.json();
+                console.log("✅ Inventario cargado:", inventarioProductos.length, "productos");
+            } catch (error) {
+                console.error("Error cargando inventario:", error);
+            }
+            
             generarAnios();
             await cargarDatos();
-            
+                    
             const fechaActual = new Date();
             const anioActual = fechaActual.getFullYear();
             const mesActual = fechaActual.getMonth();
@@ -604,6 +616,22 @@
                     const diasDuracion = calcularDias(registro.fechaIngreso, registro.fechaSalida);
                     let trabajoAgregado = false;
                     
+                    // ============================================================
+                    // NUEVO: Calcular costo de repuestos para este registro
+                    // ============================================================
+                    let costoRepuestos = 0;
+                    if (registro.repuestos && registro.repuestos.length > 0) {
+                        registro.repuestos.forEach(rep => {
+                            if (rep.descripcion) {
+                                // Buscar el producto en inventario por nombre
+                                const producto = inventarioProductos.find(p => p.nombre === rep.descripcion);
+                                if (producto) {
+                                    costoRepuestos += parseFloat(producto.costo) || 0;
+                                }
+                            }
+                        });
+                    }
+                    
                     if (registro.trabajos && registro.trabajos.length > 0) {
                         registro.trabajos.forEach(trabajo => {
                             if (trabajo.precio && parseFloat(trabajo.precio) > 0) {
@@ -615,6 +643,8 @@
                                     gananciaPorDia: parseFloat(trabajo.precio) / diasDuracion,
                                     descripcion: trabajo.descripcion,
                                     precio: parseFloat(trabajo.precio) || 0,
+                                    costoRepuestos: costoRepuestos, // ← NUEVO
+                                    gananciaReal: parseFloat(trabajo.precio) - costoRepuestos, // ← NUEVO
                                     vehiculo: registro.vehiculo?.modelo || "N/A",
                                     tipo: "taller"
                                 });
@@ -632,11 +662,15 @@
                             gananciaPorDia: parseFloat(registro.total) / diasDuracion,
                             descripcion: registro.observacionesAdicionales || "Servicio completo",
                             precio: parseFloat(registro.total) || 0,
+                            costoRepuestos: costoRepuestos, // ← NUEVO
+                            gananciaReal: parseFloat(registro.total) - costoRepuestos, // ← NUEVO
                             vehiculo: registro.vehiculo?.modelo || "N/A",
                             tipo: "taller"
                         });
                     }
                 });
+                
+                console.log(`✅ ${todosLosTrabajos.length} trabajos de taller`);
             } catch (error) {
                 console.error("Error:", error);
             }
@@ -720,18 +754,24 @@
         function actualizarVista() {
             const items = filtrarPorModuloYFecha();
             
-            const total = items.reduce((sum, t) => sum + t.precio, 0);
-            const promedio = items.length > 0 ? total / items.length : 0;
+            // ============================================================
+            // NUEVO: Calcular ingresos, costo y ganancia real
+            // ============================================================
+            const totalIngresos = items.reduce((sum, t) => sum + t.precio, 0);
+            const totalCosto = items.reduce((sum, t) => sum + (t.costoRepuestos || 0), 0);
+            const totalGananciaReal = items.reduce((sum, t) => sum + (t.gananciaReal || 0), 0);
+            const promedio = items.length > 0 ? totalIngresos / items.length : 0;
             const gananciaPorDiaTotal = items.reduce((sum, t) => sum + (t.gananciaPorDia || 0), 0);
             const maxDias = items.length > 0 ? Math.max(...items.map(t => t.diasDuracion || 1)) : 0;
             const totalDias = items.reduce((sum, t) => sum + (t.diasDuracion || 1), 0);
             
             document.getElementById('listaTitulo').textContent = "📋 Últimos trabajos";
-            document.getElementById('totalLabel').textContent = "💰 TOTAL DEL PERÍODO";
+            document.getElementById('totalLabel').textContent = "💰 GANANCIA REAL (ingresos - costo repuestos)";
             
-            document.getElementById('totalAcumulado').textContent = `$${total.toFixed(2)}`;
+            // Mostrar GANANCIA REAL en la tarjeta principal
+            document.getElementById('totalAcumulado').textContent = `$${totalGananciaReal.toFixed(2)}`;
             document.getElementById('totalTrabajos').textContent = items.length;
-            document.getElementById('totalIngresos').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('totalIngresos').textContent = `$${totalIngresos.toFixed(2)}`;
             document.getElementById('promedioTrabajo').textContent = `$${promedio.toFixed(2)}`;
             document.getElementById('gananciaPorDia').textContent = `$${gananciaPorDiaTotal.toFixed(2)}`;
             document.getElementById('trabajoMasLargo').textContent = maxDias;
@@ -754,6 +794,9 @@
                     <div class="flex-between">
                         <span class="ganancia-diaria">⏱️ ${t.diasDuracion} día(s) - $${t.gananciaPorDia.toFixed(2)}/día</span>
                         <span class="precio">💰 $${t.precio.toFixed(2)}</span>
+                    </div>
+                    <div style="font-size:0.65rem; color:#888; margin-top:4px;">
+                        Costo repuestos: $${(t.costoRepuestos || 0).toFixed(2)} | Ganancia real: $${(t.gananciaReal || 0).toFixed(2)}
                     </div>
                 </div>
             `).join('');
