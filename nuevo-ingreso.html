@@ -399,18 +399,19 @@
             
             <div class="campo" id="contenedor-repuestos" style="margin-top: 10px;">
                 <label>REPUESTOS UTILIZADOS</label>
-                <div class="fila-dinamica">
-                    <input type="text" list="lista-repuestos" placeholder="Ej. Filtro de aire" class="input-repuesto">
-                    <input type="number" placeholder="PVP $" class="input-precio" title="Precio al cliente" oninput="calcularTotal()">
-                    <input type="number" placeholder="Desc %" class="input-descuento" title="Descuento de distribuidora (Oculto al cliente)">
-                    
-                    <div class="fila-repuesto-checkbox">
-                        <input type="checkbox" class="checkbox-no-stock" id="no-stock-check">
-                        <label for="no-stock-check">No descontar stock (cliente trajo el repuesto)</label>
+                    <div class="fila-dinamica">
+                        <div class="fila-inputs">
+                            <input type="text" list="lista-repuestos" placeholder="Ej. Filtro de aire" class="input-repuesto" style="flex:2;">
+                            <input type="number" placeholder="PVP $" class="input-precio" style="flex:1;" oninput="calcularTotal()">
+                            <input type="number" placeholder="Desc %" class="input-descuento" style="flex:0.8;">
+                            <input type="text" placeholder="Observaciones" class="input-observacion" style="flex:1.5; min-width:100px;" title="Marca, referencia, o si lo trajo el cliente">
+                        </div>
+                        <div class="fila-repuesto-checkbox">
+                            <input type="checkbox" class="checkbox-no-stock" id="no-stock-check">
+                            <label for="no-stock-check">No descontar stock (cliente trajo el repuesto)</label>
+                        </div>
+                        <button type="button" class="btn-pequeno" onclick="agregarFila('contenedor-repuestos', 'repuesto')">+</button>
                     </div>
-                    
-                    <button type="button" class="btn-pequeno" onclick="agregarFila('contenedor-repuestos', 'repuesto')">+</button>
-                </div>
             </div>
                                 
             <datalist id="lista-repuestos">
