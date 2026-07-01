@@ -441,6 +441,8 @@
     </div>
 
 <script>
+        let inventarioProductos = [];
+        
         // 1. FECHAS AUTOMÁTICAS
         const inputIngreso = document.getElementById('fecha-ingreso');
         const inputSalida = document.getElementById('fecha-salida');
@@ -709,11 +711,26 @@
         let listaClientesGlobal = [];
 
         document.addEventListener("DOMContentLoaded", async () => {
-            // INICIALIZAR LISTAS DINÁMICAS
-            actualizarDatalistRepuestos();
+            // ============================================================
+            // 1. CARGAR INVENTARIO PRIMERO
+            // ============================================================
+            try {
+                const res = await fetch('/obtener-inventario');
+                inventarioProductos = await res.json();
+                console.log("✅ Inventario cargado:", inventarioProductos.length, "productos");
+            } catch (error) {
+                console.error("Error cargando inventario:", error);
+            }
+            
+            // ============================================================
+            // 2. AHORA SÍ, INICIALIZAR LISTAS DINÁMICAS (con inventario)
+            // ============================================================
+            actualizarDatalistRepuestos();   // ← ahora inventarioProductos ya tiene datos
             actualizarDatalistTrabajos();
             
-            // Cargar lista de clientes
+            // ============================================================
+            // 3. Cargar lista de clientes
+            // ============================================================
             try {
                 const respuesta = await fetch('/obtener-clientes');
                 const clientes = await respuesta.json();
