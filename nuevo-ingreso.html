@@ -442,7 +442,7 @@
 
 <script>
         let inventarioProductos = [];
-        
+
         // 1. FECHAS AUTOMÁTICAS
         const inputIngreso = document.getElementById('fecha-ingreso');
         const inputSalida = document.getElementById('fecha-salida');
@@ -550,7 +550,7 @@
                 `;
             } else {
                 nuevaFila.innerHTML = `
-                    <input type="text" list="lista-repuestos" placeholder="Otro repuesto..." class="input-repuesto">
+                    <input type="text" list="lista-repuestos" placeholder="Ej. Filtro de aire" class="input-repuesto">
                     <input type="number" placeholder="PVP $" class="input-precio" oninput="calcularTotal()">
                     <input type="number" placeholder="Desc %" class="input-descuento">
                     <div class="fila-repuesto-checkbox">
@@ -631,7 +631,7 @@
             localStorage.setItem('listaTrabajosPersonalizada', JSON.stringify(lista));
         }
 
-        // Actualizar el datalist de repuestos - SOLO INVENTARIO
+        // Actualizar el datalist de repuestos - SOLO INVENTARIO (con proveedor/marca)
         function actualizarDatalistRepuestos() {
             const datalist = document.getElementById('lista-repuestos');
             if (!datalist) return;
@@ -640,7 +640,14 @@
             if (inventarioProductos && inventarioProductos.length > 0) {
                 inventarioProductos.forEach(p => {
                     const option = document.createElement('option');
-                    option.value = p.nombre;
+                    let nombreMostrar = p.nombre;
+                    if (p.proveedor && p.proveedor.trim() !== '') {
+                        nombreMostrar = `${p.nombre} - ${p.proveedor}`;
+                    }
+                    option.value = nombreMostrar;
+                    // Guardar el nombre real del producto para que al seleccionar se use el correcto
+                    option.dataset.nombreReal = p.nombre;
+                    option.dataset.proveedor = p.proveedor || '';
                     datalist.appendChild(option);
                 });
             }
@@ -709,6 +716,36 @@
         // ============================================================
         let clienteExistenteCompleto = null;
         let listaClientesGlobal = [];
+
+        // Cuando el usuario selecciona un repuesto de la lista
+        document.addEventListener('change', function(e) {
+            const input = e.target;
+            if (input.classList.contains('input-repuesto')) {
+                const fila = input.closest('.fila-dinamica');
+                if (!fila) return;
+                
+                const valorSeleccionado = input.value;
+                // Buscar en el inventario si coincide con el nombre mostrado (con proveedor)
+                let producto = inventarioProductos.find(p => {
+                    const nombreConProveedor = p.proveedor ? `${p.nombre} - ${p.proveedor}` : p.nombre;
+                    return nombreConProveedor === valorSeleccionado || p.nombre === valorSeleccionado;
+                });
+                
+                if (producto) {
+                    // Si encontramos el producto, guardamos el nombre REAL (sin proveedor)
+                    // Esto es para que el descuento de stock funcione correctamente
+                    input.value = producto.nombre;
+                    input.dataset.productoId = producto._id;
+                    
+                    // Auto-completar el precio
+                    const precioInput = fila.querySelector('.input-precio');
+                    if (precioInput) {
+                        precioInput.value = producto.precioVenta;
+                        calcularTotal();
+                    }
+                }
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", async () => {
             // ============================================================
