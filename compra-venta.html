@@ -417,16 +417,12 @@
         }
 
         function agregarVehiculo() {
-            // Temporalmente redirige a una página que aún no existe
-            alert('📝 Próximamente: Formulario para agregar vehículo');
-            // window.location.href = 'nuevo-vehiculo.html';
+            window.location.href = 'nuevo-vehiculo.html';
         }
 
         function verVehiculo(id) {
-            // Temporalmente muestra el ID
-            alert(`📋 Ver detalle del vehículo ID: ${id}\n(Próximamente: página de detalle)`);
-            // localStorage.setItem('vehiculoSeleccionado', id);
-            // window.location.href = 'ver-vehiculo.html';
+            localStorage.setItem('vehiculoSeleccionado', id);
+            window.location.href = 'ver-vehiculo.html';
         }
 
         // ============================================================
