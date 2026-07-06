@@ -746,11 +746,14 @@
                 items = items.concat(todosLosTrabajos);
             }
             
+            // Si hay vehículos (compra/venta), agregarlos también
+            if (moduloActual === "vehiculos" || moduloActual === "todo") {
+                // items = items.concat(todosLosVehiculos); // Descomentar si tienes vehículos
+            }
+            
             return items.filter(item => {
-                const fechaStr = item.fecha.split('T')[0]; 
-                const inicioStr = inicio.toISOString().split('T')[0];
-                const finStr = fin.toISOString().split('T')[0];
-                return fechaStr >= inicioStr && fechaStr <= finStr;
+                const fechaTrabajo = new Date(item.fecha);
+                return fechaTrabajo >= inicio && fechaTrabajo <= fin;
             });
         }
         
