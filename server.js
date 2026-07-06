@@ -13,14 +13,11 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
 
 // ============================================================
-// MODELO DE CLIENTE (taller)
+// MODELOS
 // ============================================================
 const clienteSchema = new mongoose.Schema({}, { strict: false });
 const Cliente = mongoose.model('Cliente', clienteSchema);
 
-// ============================================================
-// MODELO DE INVENTARIO
-// ============================================================
 const inventarioSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     costo: { type: Number, required: true },
@@ -31,9 +28,6 @@ const inventarioSchema = new mongoose.Schema({
 });
 const Inventario = mongoose.model('Inventario', inventarioSchema);
 
-// ============================================================
-// MODELO DE VEHÍCULO (Compra/Venta) - NUEVO
-// ============================================================
 const vehiculoSchema = new mongoose.Schema({
     marca: { type: String, required: true },
     modelo: { type: String, required: true },
@@ -83,23 +77,24 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // RUTAS DE VEHÍCULOS (COMPRA/VENTA) - NUEVAS
+    // 🔥 PRIMERO: RUTAS DE API (ANTES DE ARCHIVOS ESTÁTICOS)
     // ============================================================
 
-    // GET - Obtener todos los vehículos
+    // === RUTAS DE VEHÍCULOS ===
     if (req.method === 'GET' && req.url === '/obtener-vehiculos') {
         try {
             const vehiculos = await Vehiculo.find({}).sort({ fechaCreacion: -1 });
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(vehiculos));
+            return;
         } catch (error) {
             console.error("Error obteniendo vehículos:", error);
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al obtener vehículos" }));
+            return;
         }
     }
 
-    // GET - Obtener un vehículo específico
     if (req.method === 'GET' && req.url.startsWith('/obtener-vehiculo/')) {
         try {
             const id = req.url.split('/')[2];
@@ -113,14 +108,15 @@ const servidor = http.createServer(async (req, res) => {
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(vehiculo));
+            return;
         } catch (error) {
             console.error("Error obteniendo vehículo:", error);
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al obtener vehículo" }));
+            return;
         }
     }
 
-    // POST - Guardar nuevo vehículo
     if (req.method === 'POST' && req.url === '/guardar-vehiculo') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -169,9 +165,9 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al guardar vehículo" }));
             }
         });
+        return;
     }
 
-    // PUT - Actualizar vehículo (vender, reparar, editar)
     if (req.method === 'PUT' && req.url.startsWith('/actualizar-vehiculo/')) {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -187,7 +183,6 @@ const servidor = http.createServer(async (req, res) => {
                     return;
                 }
 
-                // Actualizar campos básicos
                 if (datos.marca) vehiculo.marca = datos.marca;
                 if (datos.modelo) vehiculo.modelo = datos.modelo;
                 if (datos.año) vehiculo.año = datos.año;
@@ -199,13 +194,11 @@ const servidor = http.createServer(async (req, res) => {
                 if (datos.comprador) vehiculo.comprador = datos.comprador;
                 if (datos.observaciones) vehiculo.observaciones = datos.observaciones;
                 
-                // Manejar reparaciones
                 if (datos.reparaciones) {
                     vehiculo.reparaciones = datos.reparaciones;
                     vehiculo.costoTotalReparaciones = datos.reparaciones.reduce((sum, r) => sum + (r.costo || 0), 0);
                 }
                 
-                // VENDER VEHÍCULO
                 if (datos.estado === 'vendido' && datos.precioVenta) {
                     vehiculo.estado = 'vendido';
                     vehiculo.precioVenta = datos.precioVenta;
@@ -215,12 +208,10 @@ const servidor = http.createServer(async (req, res) => {
                     vehiculo.ganancia = (datos.precioVenta || 0) - (vehiculo.costoTotal || 0);
                 }
                 
-                // Actualizar estado si no es venta
                 if (datos.estado && datos.estado !== 'vendido') {
                     vehiculo.estado = datos.estado;
                 }
                 
-                // Recalcular costo total
                 if (!datos.estado || datos.estado !== 'vendido') {
                     vehiculo.costoTotal = (vehiculo.costoCompra || 0) + (vehiculo.costoTotalReparaciones || 0);
                 }
@@ -239,9 +230,9 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al actualizar vehículo" }));
             }
         });
+        return;
     }
 
-    // DELETE - Eliminar vehículo
     if (req.method === 'DELETE' && req.url.startsWith('/eliminar-vehiculo/')) {
         try {
             const id = req.url.split('/')[2];
@@ -260,13 +251,10 @@ const servidor = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al eliminar vehículo" }));
         }
+        return;
     }
 
-    // ============================================================
-    // RUTAS DE CLIENTES (TALLER) - EXISTENTES
-    // ============================================================
-
-    // VERIFICAR PIN
+    // === RUTAS DE CLIENTES ===
     if (req.method === 'GET' && req.url.startsWith('/verificar-pin')) {
         try {
             const urlParams = new URL(req.url, `http://${req.headers.host}`);
@@ -285,9 +273,9 @@ const servidor = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al verificar PIN" }));
         }
+        return;
     }
 
-    // GUARDAR CLIENTE
     if (req.method === 'POST' && req.url === '/guardar-cliente') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -307,7 +295,6 @@ const servidor = http.createServer(async (req, res) => {
 
                 nuevoRegistro.pinCliente = nuevoRegistro.pinCliente.toString().trim();
 
-                // Descontar stock de repuestos
                 if (nuevoRegistro.repuestos && nuevoRegistro.repuestos.length > 0) {
                     for (const repuesto of nuevoRegistro.repuestos) {
                         if (!repuesto.noDescontar && repuesto.descripcion && repuesto.descripcion.trim() !== "") {
@@ -342,12 +329,10 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al guardar en el servidor" }));
             }
         });
+        return;
     }
 
-    // ============================================================
-    // RUTAS DE INVENTARIO
-    // ============================================================
-
+    // === RUTAS DE INVENTARIO ===
     if (req.method === 'GET' && req.url === '/obtener-inventario') {
         try {
             const productos = await Inventario.find({});
@@ -357,6 +342,7 @@ const servidor = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al obtener inventario" }));
         }
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/guardar-producto') {
@@ -380,6 +366,7 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al guardar producto" }));
             }
         });
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/actualizar-producto') {
@@ -407,6 +394,7 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al actualizar producto" }));
             }
         });
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/eliminar-producto') {
@@ -423,12 +411,10 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al eliminar producto" }));
             }
         });
+        return;
     }
 
-    // ============================================================
-    // RUTAS DE CLIENTES (CONTINUACIÓN)
-    // ============================================================
-
+    // === RUTAS DE CLIENTES (continuación) ===
     if (req.method === 'POST' && req.url === '/validar-pin') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -457,6 +443,7 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error en servidor" }));
             }
         });
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/eliminar-registro') {
@@ -477,6 +464,7 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al eliminar" }));
             }
         });
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/eliminar-cliente') {
@@ -494,6 +482,7 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al eliminar" }));
             }
         });
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/actualizar-pin-masivo') {
@@ -514,6 +503,7 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al actualizar" }));
             }
         });
+        return;
     }
 
     if (req.method === 'GET' && req.url.startsWith('/obtener-clientes')) {
@@ -561,6 +551,7 @@ const servidor = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al obtener clientes" }));
         }
+        return;
     }
 
     if (req.method === 'POST' && req.url === '/eliminar-por-id') {
@@ -581,10 +572,11 @@ const servidor = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: "Error al eliminar" }));
             }
         });
+        return;
     }
 
     // ============================================================
-    // ARCHIVOS ESTÁTICOS
+    // 📁 ARCHIVOS ESTÁTICOS (SOLO DESPUÉS DE TODAS LAS RUTAS DE API)
     // ============================================================
     if (req.method === 'GET') {
         let urlPublica = req.url === '/' ? 'index.html' : req.url.split('?')[0];
