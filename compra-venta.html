@@ -274,22 +274,34 @@
             window.location.href = "index.html";
         }
 
-        // ============================================================
-        // CARGAR VEHÍCULOS - CORREGIDO: SIN ?pin=
-        // ============================================================
+        // CARGAR VEHÍCULOS - CON VERIFICACIÓN DE PIN
         async function cargarVehiculos() {
             try {
-                // ✅ ELIMINÉ EL ?pin= DE LA URL
-                const res = await fetch('/obtener-vehiculos');
+                // Obtener el PIN del localStorage
+                const pin = localStorage.getItem('pinValidated');
+                console.log("🔑 PIN que se envía:", pin);
                 
-                console.log("Status:", res.status);
+                // Si no hay PIN, redirigir al login
+                if (!pin) {
+                    alert("⛔ No hay PIN guardado. Inicia sesión nuevamente.");
+                    window.location.href = "index.html";
+                    return;
+                }
                 
-                if (!res.ok) {
-                    throw new Error(`Error ${res.status}: ${res.statusText}`);
+                // Enviar solicitud con PIN
+                const res = await fetch(`/obtener-vehiculos?pin=${pin}`);
+                console.log("📌 Status:", res.status);
+                
+                // Si es 401 o 403, el PIN no es válido
+                if (res.status === 401 || res.status === 403) {
+                    alert("⛔ PIN no autorizado. Inicia sesión nuevamente.");
+                    localStorage.removeItem('pinValidated');
+                    window.location.href = "index.html";
+                    return;
                 }
                 
                 const data = await res.json();
-                console.log("Datos recibidos:", data);
+                console.log("📌 Datos recibidos:", data);
                 
                 if (Array.isArray(data)) {
                     todosLosVehiculos = data;
