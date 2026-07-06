@@ -291,22 +291,32 @@
             try {
                 const pin = localStorage.getItem('pinValidated');
                 const res = await fetch(`/obtener-vehiculos?pin=${pin}`);
+                
+                console.log("📌 Status:", res.status);
+                
                 const data = await res.json();
+                console.log("📌 Datos recibidos:", data);
+                console.log("📌 ¿Es array?", Array.isArray(data));
                 
-                if (data.error) {
-                    console.error(data.error);
+                // Si la respuesta es un array, mostrar los vehículos
+                if (Array.isArray(data)) {
+                    todosLosVehiculos = data;
+                    mostrarVehiculos(todosLosVehiculos);
+                } else if (data.error) {
+                    console.error("Error del servidor:", data.error);
                     document.getElementById('listaVehiculos').innerHTML = `
-                        <div class="empty">❌ Error al cargar vehículos</div>
+                        <div class="empty">❌ ${data.error}</div>
                     `;
-                    return;
+                } else {
+                    console.error("Respuesta inesperada:", data);
+                    document.getElementById('listaVehiculos').innerHTML = `
+                        <div class="empty">❌ Respuesta inesperada del servidor</div>
+                    `;
                 }
-                
-                todosLosVehiculos = data || [];
-                mostrarVehiculos(todosLosVehiculos);
             } catch (error) {
                 console.error("Error cargando vehículos:", error);
                 document.getElementById('listaVehiculos').innerHTML = `
-                    <div class="empty">❌ Error de conexión</div>
+                    <div class="empty">❌ Error de conexión: ${error.message}</div>
                 `;
             }
         }
