@@ -612,9 +612,9 @@ const servidor = http.createServer(async (req, res) => {
 });
 
 // ============================================================
-// INICIAR SERVIDOR
+// INICIAR SERVIDOR - VERSIÓN CORREGIDA
 // ============================================================
-servidor.listen(PUERTO, '0.0.0.0', () => {
+servidor.listen(PUERTO, () => {
     console.log(`\n🚀 Servidor funcionando con rutas de vehículos`);
     console.log(`📌 Puerto: ${PUERTO}`);
     console.log(`📌 Modelos: Cliente, Inventario, Vehiculo`);
