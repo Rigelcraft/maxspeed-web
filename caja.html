@@ -697,10 +697,11 @@
                 return { inicio, fin, descripcion };
             }
             
-            // Vista por DÍA
+            // Vista por DÍA - CORREGIDO (usar división manual para evitar problemas de zona horaria)
             if (tVista === "dia" && fechaDia) {
-                inicio = new Date(fechaDia + 'T00:00:00');
-                fin = new Date(fechaDia + 'T23:59:59');
+                const [year, month, day] = fechaDia.split('-').map(Number);
+                inicio = new Date(year, month - 1, day, 0, 0, 0, 0);
+                fin = new Date(year, month - 1, day, 23, 59, 59, 999);
                 descripcion = `${inicio.toLocaleDateString('es-ES')}`;
                 return { inicio, fin, descripcion };
             }
