@@ -684,28 +684,24 @@
             const mes = parseInt(document.getElementById('selectorMes').value) || 0;
             const semanaOffset = parseInt(document.getElementById('selectorSemana').value) || 0;
             const fechaDia = document.getElementById('selectorFechaDia').value;
-            const anioVista = parseInt(document.getElementById('selectorAnioVista').value) || new Date().getFullYear(); // ← NUEVO
+            const anioVista = parseInt(document.getElementById('selectorAnioVista').value) || new Date().getFullYear();
             const tVista = window.tipoVistaActual || "mes";
             
-            // ============================================================
-            // NUEVO: Vista POR AÑO
-            // ============================================================
             if (tVista === "anio") {
                 inicio = new Date(anioVista, 0, 1);
-                fin = new Date(anioVista, 11, 31, 23, 59, 59);
+                fin = new Date(anioVista, 11, 31);
                 descripcion = `Año ${anioVista}`;
                 return { inicio, fin, descripcion };
             }
             
-            // Vista por DÍA - CORREGIDO (usar división manual para evitar problemas de zona horaria)
             if (tVista === "dia" && fechaDia) {
                 const [year, month, day] = fechaDia.split('-').map(Number);
-                inicio = new Date(year, month - 1, day, 0, 0, 0, 0);
-                fin = new Date(year, month - 1, day, 23, 59, 59, 999);
+                inicio = new Date(year, month - 1, day);
+                fin = new Date(year, month - 1, day);
                 descripcion = `${inicio.toLocaleDateString('es-ES')}`;
                 return { inicio, fin, descripcion };
             }
-    
+
             if (tVista === "semana") {
                 const hoy = new Date();
                 const diaSemana = hoy.getDay();
@@ -729,13 +725,13 @@
             }
             
             inicio = new Date(anio, mes, 1);
-            fin = new Date(anio, mes + 1, 0, 23, 59, 59);
+            fin = new Date(anio, mes + 1, 0);
             const nombreMes = document.querySelector('#selectorMes option:checked')?.text || "Mes";
             descripcion = `${nombreMes} ${anio}`;
             
             return { inicio, fin, descripcion };
         }
-        
+
         function filtrarPorModuloYFecha() {
             const { inicio, fin, descripcion } = obtenerRangoFecha();
             const descElem = document.getElementById('periodoDescripcion');
@@ -746,14 +742,21 @@
                 items = items.concat(todosLosTrabajos);
             }
             
-            // Si hay vehículos (compra/venta), agregarlos también
             if (moduloActual === "vehiculos" || moduloActual === "todo") {
-                // items = items.concat(todosLosVehiculos); // Descomentar si tienes vehículos
+                // items = items.concat(todosLosVehiculos);
             }
             
             return items.filter(item => {
-                const fechaTrabajo = new Date(item.fecha);
-                return fechaTrabajo >= inicio && fechaTrabajo <= fin;
+                // 🔥 CREAR FECHA SIN ZONA HORARIA
+                const fechaStr = item.fecha.split('T')[0];
+                const [year, month, day] = fechaStr.split('-').map(Number);
+                const fechaTrabajo = new Date(year, month - 1, day);
+                
+                // NORMALIZAR INICIO Y FIN
+                const inicioNormalizado = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate());
+                const finNormalizado = new Date(fin.getFullYear(), fin.getMonth(), fin.getDate());
+                
+                return fechaTrabajo >= inicioNormalizado && fechaTrabajo <= finNormalizado;
             });
         }
         
