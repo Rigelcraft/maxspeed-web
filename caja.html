@@ -763,12 +763,9 @@
             const promedio = items.length > 0 ? totalIngresos / items.length : 0;
             
             // ============================================================
-            // NUEVO: Ganancia por día REAL (usando ganancia_real, no precio)
+            // GANANCIA POR DÍA = Ganancia total del mes / días del mes
             // ============================================================
-            const gananciaPorDiaTotal = items.reduce((sum, t) => {
-                const gananciaDiaria = t.diasDuracion > 0 ? (t.gananciaReal || 0) / t.diasDuracion : 0;
-                return sum + gananciaDiaria;
-            }, 0);
+            const gananciaPorDiaTotal = totalGananciaReal / totalDiasPeriodo;
             
             const maxDias = items.length > 0 ? Math.max(...items.map(t => t.diasDuracion || 1)) : 0;
             const totalDias = items.reduce((sum, t) => sum + (t.diasDuracion || 1), 0);
