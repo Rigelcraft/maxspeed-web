@@ -816,8 +816,11 @@
         
         function formatearFecha(fechaISO) {
             if (!fechaISO) return "S/F";
-            const fecha = new Date(fechaISO);
-            return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+            const partes = fechaISO.split('-');
+            const año = parseInt(partes[0]);
+            const mes = parseInt(partes[1]);
+            const dia = parseInt(partes[2]);
+            return `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}`;
         }
         
         function escapeHtml(texto) {
