@@ -32,24 +32,19 @@ const inventarioSchema = new mongoose.Schema({
 const Inventario = mongoose.model('Inventario', inventarioSchema);
 
 // ============================================================
-// MODELO DE VEHÍCULO (Compra/Venta)
+// MODELO DE VEHÍCULO (Compra/Venta) - NUEVO
 // ============================================================
 const vehiculoSchema = new mongoose.Schema({
-    // Datos del vehículo
     marca: { type: String, required: true },
     modelo: { type: String, required: true },
     año: { type: Number },
     color: { type: String },
     patente: { type: String, unique: true, sparse: true },
     kilometraje: { type: Number, default: 0 },
-    
-    // Compra
     fechaCompra: { type: Date, default: Date.now },
     costoCompra: { type: Number, required: true },
     proveedor: { type: String, default: '' },
-    comprador: { type: String, default: '' }, // Quien lo vendió al taller
-    
-    // Reparaciones
+    comprador: { type: String, default: '' },
     reparaciones: [{
         descripcion: { type: String },
         costo: { type: Number, default: 0 },
@@ -57,36 +52,26 @@ const vehiculoSchema = new mongoose.Schema({
         proveedor: { type: String, default: '' }
     }],
     costoTotalReparaciones: { type: Number, default: 0 },
-    costoTotal: { type: Number, default: 0 }, // costoCompra + reparaciones
-    
-    // Venta
+    costoTotal: { type: Number, default: 0 },
     fechaVenta: { type: Date },
     precioVenta: { type: Number, default: 0 },
-    compradorFinal: { type: String, default: '' }, // Quien compra el vehículo
-    ganancia: { type: Number, default: 0 }, // precioVenta - costoTotal
-    
-    // Estado
+    compradorFinal: { type: String, default: '' },
+    ganancia: { type: Number, default: 0 },
     estado: { 
         type: String, 
         enum: ['disponible', 'en_reparacion', 'vendido'],
         default: 'disponible'
     },
-    
-    // Notas adicionales
     observaciones: { type: String, default: '' },
-    
-    // Fechas de creación y actualización
     fechaCreacion: { type: Date, default: Date.now },
     fechaActualizacion: { type: Date, default: Date.now }
 });
-
 const Vehiculo = mongoose.model('Vehiculo', vehiculoSchema);
 
 // ============================================================
-// SERVIDOR PRINCIPAL
+// SERVIDOR
 // ============================================================
 const servidor = http.createServer(async (req, res) => {
-    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -98,12 +83,10 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // RUTAS DE VEHÍCULOS (COMPRA/VENTA)
+    // RUTAS DE VEHÍCULOS (COMPRA/VENTA) - NUEVAS
     // ============================================================
 
-    // -------------------------------------------------------------
     // GET - Obtener todos los vehículos
-    // -------------------------------------------------------------
     if (req.method === 'GET' && req.url === '/obtener-vehiculos') {
         try {
             const vehiculos = await Vehiculo.find({}).sort({ fechaCreacion: -1 });
@@ -116,9 +99,7 @@ const servidor = http.createServer(async (req, res) => {
         }
     }
 
-    // -------------------------------------------------------------
-    // GET - Obtener un vehículo específico por ID
-    // -------------------------------------------------------------
+    // GET - Obtener un vehículo específico
     if (req.method === 'GET' && req.url.startsWith('/obtener-vehiculo/')) {
         try {
             const id = req.url.split('/')[2];
@@ -139,9 +120,7 @@ const servidor = http.createServer(async (req, res) => {
         }
     }
 
-    // -------------------------------------------------------------
     // POST - Guardar nuevo vehículo
-    // -------------------------------------------------------------
     if (req.method === 'POST' && req.url === '/guardar-vehiculo') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -149,7 +128,6 @@ const servidor = http.createServer(async (req, res) => {
             try {
                 const datos = JSON.parse(cuerpo);
                 
-                // Validar campos obligatorios
                 if (!datos.marca || !datos.modelo || !datos.costoCompra) {
                     res.writeHead(400);
                     res.end(JSON.stringify({ 
@@ -158,7 +136,6 @@ const servidor = http.createServer(async (req, res) => {
                     return;
                 }
 
-                // Calcular costo total
                 const costoTotal = (datos.costoCompra || 0) + (datos.costoTotalReparaciones || 0);
                 
                 const nuevoVehiculo = new Vehiculo({
@@ -194,9 +171,7 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
-    // -------------------------------------------------------------
     // PUT - Actualizar vehículo (vender, reparar, editar)
-    // -------------------------------------------------------------
     if (req.method === 'PUT' && req.url.startsWith('/actualizar-vehiculo/')) {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -212,7 +187,7 @@ const servidor = http.createServer(async (req, res) => {
                     return;
                 }
 
-                // Actualizar campos
+                // Actualizar campos básicos
                 if (datos.marca) vehiculo.marca = datos.marca;
                 if (datos.modelo) vehiculo.modelo = datos.modelo;
                 if (datos.año) vehiculo.año = datos.año;
@@ -230,7 +205,7 @@ const servidor = http.createServer(async (req, res) => {
                     vehiculo.costoTotalReparaciones = datos.reparaciones.reduce((sum, r) => sum + (r.costo || 0), 0);
                 }
                 
-                // 🔥 VENDER VEHÍCULO
+                // VENDER VEHÍCULO
                 if (datos.estado === 'vendido' && datos.precioVenta) {
                     vehiculo.estado = 'vendido';
                     vehiculo.precioVenta = datos.precioVenta;
@@ -245,7 +220,7 @@ const servidor = http.createServer(async (req, res) => {
                     vehiculo.estado = datos.estado;
                 }
                 
-                // Recalcular costo total si cambió algo
+                // Recalcular costo total
                 if (!datos.estado || datos.estado !== 'vendido') {
                     vehiculo.costoTotal = (vehiculo.costoCompra || 0) + (vehiculo.costoTotalReparaciones || 0);
                 }
@@ -266,9 +241,7 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
-    // -------------------------------------------------------------
     // DELETE - Eliminar vehículo
-    // -------------------------------------------------------------
     if (req.method === 'DELETE' && req.url.startsWith('/eliminar-vehiculo/')) {
         try {
             const id = req.url.split('/')[2];
@@ -290,12 +263,10 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // RUTAS DE CLIENTES (Taller) - YA EXISTENTES
+    // RUTAS DE CLIENTES (TALLER) - EXISTENTES
     // ============================================================
 
-    // -------------------------------------------------------------
-    // RUTA: VERIFICAR SI PIN YA EXISTE
-    // -------------------------------------------------------------
+    // VERIFICAR PIN
     if (req.method === 'GET' && req.url.startsWith('/verificar-pin')) {
         try {
             const urlParams = new URL(req.url, `http://${req.headers.host}`);
@@ -316,9 +287,7 @@ const servidor = http.createServer(async (req, res) => {
         }
     }
 
-    // -------------------------------------------------------------
-    // RUTA: GUARDAR CLIENTE (CON DESCUENTO DE STOCK)
-    // -------------------------------------------------------------
+    // GUARDAR CLIENTE
     if (req.method === 'POST' && req.url === '/guardar-cliente') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -326,23 +295,19 @@ const servidor = http.createServer(async (req, res) => {
             try {
                 const nuevoRegistro = JSON.parse(cuerpo);
                 
-                // Normalizar cédula
                 if (nuevoRegistro.cedulaRuc) {
                     nuevoRegistro.cedulaRuc = nuevoRegistro.cedulaRuc.toString().trim();
                 }
 
-                // VALIDAR que el PIN venga del frontend
                 if (!nuevoRegistro.pinCliente || nuevoRegistro.pinCliente.toString().trim() === "") {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: "El PIN es obligatorio. Debe generarse en el formulario." }));
+                    res.end(JSON.stringify({ error: "El PIN es obligatorio." }));
                     return;
                 }
 
                 nuevoRegistro.pinCliente = nuevoRegistro.pinCliente.toString().trim();
 
-                // ============================================================
-                // DESCONTAR STOCK DE REPUESTOS
-                // ============================================================
+                // Descontar stock de repuestos
                 if (nuevoRegistro.repuestos && nuevoRegistro.repuestos.length > 0) {
                     for (const repuesto of nuevoRegistro.repuestos) {
                         if (!repuesto.noDescontar && repuesto.descripcion && repuesto.descripcion.trim() !== "") {
@@ -356,18 +321,13 @@ const servidor = http.createServer(async (req, res) => {
                                         { _id: producto._id },
                                         { $inc: { stock: -1 } }
                                     );
-                                    console.log(`📦 Stock descontado: ${producto.nombre} (${producto.stock - 1} restantes)`);
-                                } else {
-                                    console.log(`⚠️ Stock insuficiente para: ${producto.nombre} (${producto.stock} disponibles)`);
+                                    console.log(`📦 Stock descontado: ${producto.nombre}`);
                                 }
-                            } else {
-                                console.log(`ℹ️ Producto no encontrado en inventario: "${repuesto.descripcion}"`);
                             }
                         }
                     }
                 }
 
-                // Guardar en MongoDB
                 const nuevoDoc = new Cliente(nuevoRegistro);
                 await nuevoDoc.save();
                 
@@ -385,23 +345,20 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // RUTAS PARA INVENTARIO
+    // RUTAS DE INVENTARIO
     // ============================================================
 
-    // Obtener todos los productos del inventario
     if (req.method === 'GET' && req.url === '/obtener-inventario') {
         try {
             const productos = await Inventario.find({});
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(productos));
         } catch (error) {
-            console.error("Error obteniendo inventario:", error);
             res.writeHead(500);
             res.end(JSON.stringify({ error: "Error al obtener inventario" }));
         }
     }
 
-    // Guardar nuevo producto
     if (req.method === 'POST' && req.url === '/guardar-producto') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -419,14 +376,12 @@ const servidor = http.createServer(async (req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ mensaje: "Producto guardado correctamente" }));
             } catch (error) {
-                console.error("Error guardando producto:", error);
                 res.writeHead(500);
                 res.end(JSON.stringify({ error: "Error al guardar producto" }));
             }
         });
     }
 
-    // Actualizar producto existente
     if (req.method === 'POST' && req.url === '/actualizar-producto') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -448,14 +403,12 @@ const servidor = http.createServer(async (req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ mensaje: "Producto actualizado correctamente" }));
             } catch (error) {
-                console.error("Error actualizando producto:", error);
                 res.writeHead(500);
                 res.end(JSON.stringify({ error: "Error al actualizar producto" }));
             }
         });
     }
 
-    // Eliminar producto
     if (req.method === 'POST' && req.url === '/eliminar-producto') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -466,7 +419,6 @@ const servidor = http.createServer(async (req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ mensaje: "Producto eliminado correctamente" }));
             } catch (error) {
-                console.error("Error eliminando producto:", error);
                 res.writeHead(500);
                 res.end(JSON.stringify({ error: "Error al eliminar producto" }));
             }
@@ -477,7 +429,6 @@ const servidor = http.createServer(async (req, res) => {
     // RUTAS DE CLIENTES (CONTINUACIÓN)
     // ============================================================
 
-    // VALIDACIÓN DE PIN
     if (req.method === 'POST' && req.url === '/validar-pin') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -508,18 +459,13 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
-    // ELIMINAR REGISTRO ESPECÍFICO (TRABAJO COMPLETO)
     if (req.method === 'POST' && req.url === '/eliminar-registro') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
         req.on('end', async () => {
             try {
                 const { pinCliente, fechaIngreso } = JSON.parse(cuerpo);
-                console.log("📌 Servidor recibió - PIN:", pinCliente, "Fecha:", fechaIngreso);
-                
                 const resultado = await Cliente.deleteMany({ pinCliente: pinCliente, fechaIngreso: fechaIngreso });
-                console.log("📊 Registros eliminados:", resultado.deletedCount);
-                
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
                     mensaje: "Registro eliminado exitosamente",
@@ -533,7 +479,6 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
-    // ELIMINAR CLIENTE COMPLETO
     if (req.method === 'POST' && req.url === '/eliminar-cliente') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
@@ -541,7 +486,6 @@ const servidor = http.createServer(async (req, res) => {
             try {
                 const { cedulaRuc } = JSON.parse(cuerpo);
                 await Cliente.deleteMany({ cedulaRuc: cedulaRuc });
-                
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ mensaje: "Cliente eliminado correctamente" }));
             } catch (e) {
@@ -552,19 +496,16 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
-    // ACTUALIZAR PIN MASIVO
     if (req.method === 'POST' && req.url === '/actualizar-pin-masivo') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
         req.on('end', async () => {
             try {
                 const { cedulaRuc, nuevoPin } = JSON.parse(cuerpo);
-                
                 await Cliente.updateMany(
                     { cedulaRuc: cedulaRuc },
                     { $set: { pinCliente: nuevoPin } }
                 );
-                
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ mensaje: "PIN actualizado en todos los registros." }));
             } catch (e) {
@@ -575,7 +516,6 @@ const servidor = http.createServer(async (req, res) => {
         });
     }
 
-    // OBTENER CLIENTES
     if (req.method === 'GET' && req.url.startsWith('/obtener-clientes')) {
         try {
             const urlParams = new URL(req.url, `http://${req.headers.host}`);
@@ -623,18 +563,13 @@ const servidor = http.createServer(async (req, res) => {
         }
     }
 
-    // ELIMINAR POR ID (ÚNICO)
     if (req.method === 'POST' && req.url === '/eliminar-por-id') {
         let cuerpo = '';
         req.on('data', pedacito => { cuerpo += pedacito; });
         req.on('end', async () => {
             try {
                 const { id } = JSON.parse(cuerpo);
-                console.log("📌 Eliminando por ID:", id);
-                
                 const resultado = await Cliente.deleteOne({ _id: id });
-                console.log("📊 Eliminados:", resultado.deletedCount);
-                
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
                     mensaje: "Registro eliminado exitosamente",
@@ -688,7 +623,7 @@ const servidor = http.createServer(async (req, res) => {
 // INICIAR SERVIDOR
 // ============================================================
 servidor.listen(PUERTO, '0.0.0.0', () => {
-    console.log(`\n🚀 Servidor funcionando`);
+    console.log(`\n🚀 Servidor funcionando con rutas de vehículos`);
     console.log(`📌 Puerto: ${PUERTO}`);
     console.log(`📌 Modelos: Cliente, Inventario, Vehiculo`);
     console.log(`📌 Rutas de vehículos disponibles:`);
