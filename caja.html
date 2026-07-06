@@ -774,11 +774,11 @@
             const totalDias = items.reduce((sum, t) => sum + (t.diasDuracion || 1), 0);
             
             // ============================================================
-            // NUEVO: Total de días del período seleccionado
+            // Total de días del período seleccionado (CORREGIDO)
             // ============================================================
             const { inicio, fin } = obtenerRangoFecha();
-            const totalDiasPeriodo = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
-            
+            const totalDiasPeriodo = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24));
+
             document.getElementById('listaTitulo').textContent = "📋 Últimos trabajos";
             document.getElementById('totalLabel').textContent = "💰 GANANCIA REAL (ingresos - costo repuestos)";
             
