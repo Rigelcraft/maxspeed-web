@@ -747,8 +747,10 @@
             }
             
             return items.filter(item => {
-                const fecha = new Date(item.fecha);
-                return fecha >= inicio && fecha <= fin;
+                const fechaStr = item.fecha.split('T')[0]; 
+                const inicioStr = inicio.toISOString().split('T')[0];
+                const finStr = fin.toISOString().split('T')[0];
+                return fechaStr >= inicioStr && fechaStr <= finStr;
             });
         }
         
