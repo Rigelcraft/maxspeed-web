@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MaxSpeed - Detalle Vehículo</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #000;
+        }
+
+        body {
+            background-image: url('https://img.freepik.com/foto-gratis/trabajador-servicio-coche-musculoso-reparando-vehiculo_146671-19605.jpg?semt=ais_hybrid&w=740&q=80');
+            background-size: cover;
+            background-position: 80% center !important;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: rgb(0 0 0 / 34%);
+            background-blend-mode: darken;
+            display: block;
+            overflow-y: auto;
+            padding: 30px 0 50px 0;
+        }
+
+        .contenedor-principal {
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .bloque-encabezado {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-imagen {
+            max-width: 100%;
+            width: 350px;
+            height: auto;
+            display: block;
+        }
+
+        .titulo-seccion {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Tarjeta de detalle */
+        .detalle-card {
+            background: white;
+            border: 4px solid #000;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .detalle-card h2 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .campo {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .campo:last-child {
+            border-bottom: none;
+        }
+
+        .campo-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        .campo-valor {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .campo-valor.ganancia {
+            color: #2ecc71;
+        }
+
+        .campo-valor.perdida {
+            color: #e74c3c;
+        }
+
+        .estado-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .estado-disponible {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .estado-vendido {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .estado-reparacion {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Reparaciones */
+        .reparaciones-list {
+            margin-top: 10px;
+        }
+
+        .reparacion-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 2px solid #dee2e6;
+        }
+
+        .reparacion-item .desc {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .reparacion-item .costo {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .reparacion-item .fecha {
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        /* Botones de acción */
+        .btn-vender {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #27ae60;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-vender:active {
+            transform: scale(0.98);
+        }
+
+        .btn-reparacion {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #f39c12;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-reparacion:active {
+            transform: scale(0.98);
+        }
+
+        .btn-eliminar {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #e74c3c;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-eliminar:active {
+            transform: scale(0.98);
+        }
+
+        .btn-volver {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background-color: #7f8c8d;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-volver:active {
+            transform: scale(0.98);
+        }
+
+        .loading, .empty {
+            text-align: center;
+            padding: 30px;
+            font-weight: bold;
+            color: #fff;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        /* Modal para vender */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.activo {
+            display: flex;
+        }
+
+        .modal-contenido {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 340px;
+            width: 90%;
+            border: 4px solid #000;
+        }
+
+        .modal-contenido h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .modal-contenido input {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #000;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .modal-botones {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-botones button {
+            flex: 1;
+            padding: 12px;
+            border: 3px solid #000;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-botones .btn-confirmar {
+            background: #27ae60;
+            color: white;
+        }
+
+        .modal-botones .btn-cancelar {
+            background: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <div class="bloque-encabezado">
+            <img src="logo.png" alt="MaxSpeed" class="logo-imagen">
+            <h1 class="titulo-seccion">🚗 Detalle Vehículo</h1>
+        </div>
+
+        <div id="detalleContainer">
+            <div class="loading">Cargando vehículo...</div>
+        </div>
+
+        <button class="btn-volver" onclick="window.location.href='compra-venta.html'">← Volver a Compra/Venta</button>
+    </div>
+
+    <!-- Modal para vender -->
+    <div class="modal-overlay" id="modalVender">
+        <div class="modal-contenido">
+            <h3>💰 Vender Vehículo</h3>
+            <input type="number" id="precioVenta" placeholder="Precio de venta">
+            <input type="text" id="compradorFinal" placeholder="Nombre del comprador">
+            <div class="modal-botones">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirmar" onclick="confirmarVenta()">Vender</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let vehiculoActual = null;
+        let vehiculoId = null;
+
+        // ============================================================
+        // SEGURIDAD
+        // ============================================================
+        if (localStorage.getItem('tipoUsuario') !== 'admin') {
+            alert("⛔ Acceso denegado");
+            window.location.href = "index.html";
+        }
+
+        // ============================================================
+        // CARGAR VEHÍCULO
+        // ============================================================
+        async function cargarVehiculo() {
+            try {
+                vehiculoId = localStorage.getItem('vehiculoSeleccionado');
+                if (!vehiculoId) {
+                    document.getElementById('detalleContainer').innerHTML = `
+                        <div class="empty">❌ No se encontró el vehículo</div>
+                    `;
+                    return;
+                }
+
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch(`/obtener-vehiculo/${vehiculoId}?pin=${pin}`);
+                
+                if (!res.ok) {
+                    throw new Error('Vehículo no encontrado');
+                }
+
+                vehiculoActual = await res.json();
+                mostrarDetalle(vehiculoActual);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('detalleContainer').innerHTML = `
+                    <div class="empty">❌ Error al cargar el vehículo</div>
+                `;
+            }
+        }
+
+        // ============================================================
+        // MOSTRAR DETALLE
+        // ============================================================
+        function mostrarDetalle(v) {
+            const estadoClass = v.estado === 'vendido' ? 'estado-vendido' : 
+                               v.estado === 'en_reparacion' ? 'estado-reparacion' : 'estado-disponible';
+            const estadoTexto = v.estado === 'vendido' ? '✅ Vendido' : 
+                               v.estado === 'en_reparacion' ? '🔧 En reparación' : '📌 Disponible';
+
+            const ganancia = v.estado === 'vendido' && v.ganancia ? v.ganancia : 0;
+            const gananciaClass = ganancia >= 0 ? 'ganancia' : 'perdida';
+
+            const reparacionesHtml = v.reparaciones && v.reparaciones.length > 0 ? 
+                v.reparaciones.map(r => `
+                    <div class="reparacion-item">
+                        <div class="desc">🔧 ${escapeHtml(r.descripcion || 'Sin descripción')}</div>
+                        <div class="costo">💰 $${formatearPrecio(r.costo || 0)}</div>
+                        <div class="fecha">📅 ${r.fecha ? new Date(r.fecha).toLocaleDateString('es-ES') : 'S/F'}</div>
+                    </div>
+                `).join('') :
+                '<div style="color:#888; font-size:0.8rem;">Sin reparaciones registradas</div>';
+
+            document.getElementById('detalleContainer').innerHTML = `
+                <div class="detalle-card">
+                    <h2>${escapeHtml(v.marca)} ${escapeHtml(v.modelo)} ${v.año || ''}</h2>
+                    
+                    <div class="campo">
+                        <span class="campo-label">🔢 Patente</span>
+                        <span class="campo-valor">${escapeHtml(v.patente || 'Sin patente')}</span>
+                    </div>
+                    <div class="campo">
+                        <span class="campo-label">🎨 Color</span>
+                        <span class="campo-valor">${escapeHtml(v.color || 'No especificado')}</span>
+                    </div>
+                    <div class="campo">
+                        <span class="campo-label">📊 Kilometraje</span>
+                        <span class="campo-valor">${v.kilometraje ? v.kilometraje.toLocaleString() + ' km' : 'No especificado'}</span>
+                    </div>
+                    <div class="campo">
+                        <span class="campo-label">📌 Estado</span>
+                        <span class="campo-valor"><span class="estado-badge ${estadoClass}">${estadoTexto}</span></span>
+                    </div>
+                    <div class="campo">
+                        <span class="campo-label">💰 Costo de Compra</span>
+                        <span class="campo-valor">$${formatearPrecio(v.costoCompra || 0)}</span>
+                    </div>
+                    <div class="campo">
+                        <span class="campo-label">🔧 Reparaciones</span>
+                        <span class="campo-valor">$${formatearPrecio(v.costoTotalReparaciones || 0)}</span>
+                    </div>
+                    <div class="campo">
+                        <span class="campo-label">📦 Costo Total</span>
+                        <span class="campo-valor">$${formatearPrecio(v.costoTotal || 0)}</span>
+                    </div>
+                    ${v.estado === 'vendido' ? `
+                        <div class="campo">
+                            <span class="campo-label">💰 Precio de Venta</span>
+                            <span class="campo-valor">$${formatearPrecio(v.precioVenta || 0)}</span>
+                        </div>
+                        <div class="campo">
+                            <span class="campo-label">👤 Comprador</span>
+                            <span class="campo-valor">${escapeHtml(v.compradorFinal || 'No especificado')}</span>
+                        </div>
+                        <div class="campo">
+                            <span class="campo-label">📈 Ganancia</span>
+                            <span class="campo-valor ${gananciaClass}">$${formatearPrecio(ganancia)}</span>
+                        </div>
+                    ` : ''}
+                    ${v.proveedor ? `
+                        <div class="campo">
+                            <span class="campo-label">🏢 Proveedor</span>
+                            <span class="campo-valor">${escapeHtml(v.proveedor)}</span>
+                        </div>
+                    ` : ''}
+                    ${v.observaciones ? `
+                        <div class="campo" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                            <span class="campo-label">📝 Observaciones</span>
+                            <span class="campo-valor" style="text-align:left; font-weight:normal;">${escapeHtml(v.observaciones)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="detalle-card">
+                    <h3>🔧 Reparaciones</h3>
+                    <div class="reparaciones-list">${reparacionesHtml}</div>
+                </div>
+
+                ${v.estado !== 'vendido' ? `
+                    <button class="btn-vender" onclick="abrirModalVender()">💰 Vender Vehículo</button>
+                    <button class="btn-reparacion" onclick="agregarReparacion()">🔧 Agregar Reparación</button>
+                ` : ''}
+                <button class="btn-eliminar" onclick="eliminarVehiculo()">🗑️ Eliminar Vehículo</button>
+            `;
+        }
+
+        // ============================================================
+        // FUNCIONES AUXILIARES
+        // ============================================================
+        function formatearPrecio(valor) {
+            return valor.toLocaleString('es-CL');
+        }
+
+        function escapeHtml(texto) {
+            if (!texto) return '';
+            return texto.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+
+        // ============================================================
+        // MODAL VENTA
+        // ============================================================
+        function abrirModalVender() {
+            document.getElementById('modalVender').classList.add('activo');
+            document.getElementById('precioVenta').value = '';
+            document.getElementById('compradorFinal').value = '';
+            document.getElementById('precioVenta').focus();
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalVender').classList.remove('activo');
+        }
+
+        async function confirmarVenta() {
+            const precioVenta = parseFloat(document.getElementById('precioVenta').value);
+            const compradorFinal = document.getElementById('compradorFinal').value.trim();
+
+            if (!precioVenta || precioVenta <= 0) {
+                alert('⚠️ Ingresa un precio de venta válido');
+                return;
+            }
+
+            if (!compradorFinal) {
+                alert('⚠️ Ingresa el nombre del comprador');
+                return;
+            }
+
+            try {
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch(`/actualizar-vehiculo/${vehiculoId}?pin=${pin}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        estado: 'vendido',
+                        precioVenta: precioVenta,
+                        compradorFinal: compradorFinal
+                    })
+                });
+
+                const resultado = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Vehículo vendido correctamente');
+                    cerrarModal();
+                    cargarVehiculo();
+                } else {
+                    alert(`❌ ${resultado.error || 'Error al vender'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+
+        // ============================================================
+        // AGREGAR REPARACIÓN (simple por ahora)
+        // ============================================================
+        function agregarReparacion() {
+            const descripcion = prompt('📝 Descripción de la reparación:');
+            if (!descripcion) return;
+
+            const costo = prompt('💰 Costo de la reparación:');
+            if (!costo || isNaN(costo) || parseFloat(costo) <= 0) {
+                alert('⚠️ Ingresa un costo válido');
+                return;
+            }
+
+            // Guardar reparación
+            guardarReparacion(descripcion, parseFloat(costo));
+        }
+
+        async function guardarReparacion(descripcion, costo) {
+            try {
+                const reparacion = {
+                    descripcion: descripcion,
+                    costo: costo,
+                    fecha: new Date().toISOString()
+                };
+
+                const reparacionesActuales = vehiculoActual.reparaciones || [];
+                const nuevasReparaciones = [...reparacionesActuales, reparacion];
+
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch(`/actualizar-vehiculo/${vehiculoId}?pin=${pin}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reparaciones: nuevasReparaciones
+                    })
+                });
+
+                const resultado = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Reparación agregada correctamente');
+                    cargarVehiculo();
+                } else {
+                    alert(`❌ ${resultado.error || 'Error al agregar reparación'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+
+        // ============================================================
+        // ELIMINAR VEHÍCULO
+        // ============================================================
+        async function eliminarVehiculo() {
+            if (!confirm('⚠️ ¿Estás seguro de eliminar este vehículo?')) return;
+            if (!confirm('⚠️ Esta acción no se puede deshacer. ¿Continuar?')) return;
+
+            try {
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch(`/eliminar-vehiculo/${vehiculoId}?pin=${pin}`, {
+                    method: 'DELETE'
+                });
+
+                const resultado = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Vehículo eliminado correctamente');
+                    window.location.href = 'compra-venta.html';
+                } else {
+                    alert(`❌ ${resultado.error || 'Error al eliminar'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarVehiculo();
+        });
+    </script>
+</body>
+</html>

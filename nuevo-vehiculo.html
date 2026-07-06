@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MaxSpeed - Nuevo Vehículo</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #000;
+        }
+
+        body {
+            background-image: url('https://img.freepik.com/foto-gratis/trabajador-servicio-coche-musculoso-reparando-vehiculo_146671-19605.jpg?semt=ais_hybrid&w=740&q=80');
+            background-size: cover;
+            background-position: 80% center !important;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: rgb(0 0 0 / 34%);
+            background-blend-mode: darken;
+            display: block;
+            overflow-y: auto;
+            padding: 30px 0 50px 0;
+        }
+
+        .contenedor-principal {
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .bloque-encabezado {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-imagen {
+            max-width: 100%;
+            width: 350px;
+            height: auto;
+            display: block;
+        }
+
+        .titulo-seccion {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .formulario-vehiculo {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .grupo-formulario {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .grupo-formulario label {
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        .grupo-formulario input,
+        .grupo-formulario select,
+        .grupo-formulario textarea {
+            padding: 12px;
+            border: 3px solid #000;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            outline: none;
+            background: white;
+        }
+
+        .grupo-formulario textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .fila-doble {
+            display: flex;
+            gap: 10px;
+        }
+
+        .fila-doble .grupo-formulario {
+            flex: 1;
+        }
+
+        .btn-guardar {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background-color: #2ecc71;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-guardar:active {
+            transform: scale(0.98);
+        }
+
+        .btn-volver {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background-color: #7f8c8d;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-volver:active {
+            transform: scale(0.98);
+        }
+
+        .estado-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .estado-disponible {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .estado-reparacion {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading, .empty {
+            text-align: center;
+            padding: 30px;
+            font-weight: bold;
+            color: #fff;
+            font-size: 0.85rem;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        .mensaje-exito {
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .mensaje-error {
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <div class="bloque-encabezado">
+            <img src="logo.png" alt="MaxSpeed" class="logo-imagen">
+            <h1 class="titulo-seccion">🚗 Nuevo Vehículo</h1>
+        </div>
+
+        <div id="mensajeExito" class="mensaje-exito">✅ Vehículo guardado correctamente</div>
+        <div id="mensajeError" class="mensaje-error">❌ Error al guardar el vehículo</div>
+
+        <form id="formVehiculo" class="formulario-vehiculo">
+            <div class="fila-doble">
+                <div class="grupo-formulario">
+                    <label>🚗 Marca *</label>
+                    <input type="text" id="marca" placeholder="Toyota" required>
+                </div>
+                <div class="grupo-formulario">
+                    <label>📐 Modelo *</label>
+                    <input type="text" id="modelo" placeholder="Corolla" required>
+                </div>
+            </div>
+
+            <div class="fila-doble">
+                <div class="grupo-formulario">
+                    <label>📅 Año</label>
+                    <input type="number" id="anio" placeholder="2020">
+                </div>
+                <div class="grupo-formulario">
+                    <label>🎨 Color</label>
+                    <input type="text" id="color" placeholder="Rojo">
+                </div>
+            </div>
+
+            <div class="fila-doble">
+                <div class="grupo-formulario">
+                    <label>🔢 Patente</label>
+                    <input type="text" id="patente" placeholder="ABC-123">
+                </div>
+                <div class="grupo-formulario">
+                    <label>📊 Kilometraje</label>
+                    <input type="number" id="kilometraje" placeholder="45000">
+                </div>
+            </div>
+
+            <div class="fila-doble">
+                <div class="grupo-formulario">
+                    <label>💰 Costo de Compra *</label>
+                    <input type="number" id="costoCompra" placeholder="8500000" required>
+                </div>
+                <div class="grupo-formulario">
+                    <label>📌 Estado</label>
+                    <select id="estado">
+                        <option value="disponible">📌 Disponible</option>
+                        <option value="en_reparacion">🔧 En reparación</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grupo-formulario">
+                <label>🏢 Proveedor (quien te lo vendió)</label>
+                <input type="text" id="proveedor" placeholder="Nombre del proveedor">
+            </div>
+
+            <div class="grupo-formulario">
+                <label>📝 Observaciones</label>
+                <textarea id="observaciones" placeholder="Estado del vehículo, detalles, etc."></textarea>
+            </div>
+
+            <button type="submit" class="btn-guardar">💾 Guardar Vehículo</button>
+        </form>
+
+        <button class="btn-volver" onclick="window.location.href='compra-venta.html'">← Volver a Compra/Venta</button>
+    </div>
+
+    <script>
+        // ============================================================
+        // SEGURIDAD
+        // ============================================================
+        if (localStorage.getItem('tipoUsuario') !== 'admin') {
+            alert("⛔ Acceso denegado");
+            window.location.href = "index.html";
+        }
+
+        // ============================================================
+        // GUARDAR VEHÍCULO
+        // ============================================================
+        document.getElementById('formVehiculo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const mensajeExito = document.getElementById('mensajeExito');
+            const mensajeError = document.getElementById('mensajeError');
+            
+            // Ocultar mensajes anteriores
+            mensajeExito.style.display = 'none';
+            mensajeError.style.display = 'none';
+
+            // Recopilar datos
+            const datos = {
+                marca: document.getElementById('marca').value.trim(),
+                modelo: document.getElementById('modelo').value.trim(),
+                año: parseInt(document.getElementById('anio').value) || 0,
+                color: document.getElementById('color').value.trim(),
+                patente: document.getElementById('patente').value.trim().toUpperCase(),
+                kilometraje: parseInt(document.getElementById('kilometraje').value) || 0,
+                costoCompra: parseFloat(document.getElementById('costoCompra').value) || 0,
+                estado: document.getElementById('estado').value,
+                proveedor: document.getElementById('proveedor').value.trim(),
+                observaciones: document.getElementById('observaciones').value.trim(),
+                reparaciones: []
+            };
+
+            // Validar campos obligatorios
+            if (!datos.marca || !datos.modelo || !datos.costoCompra || datos.costoCompra <= 0) {
+                mensajeError.textContent = '❌ Marca, modelo y costo de compra son obligatorios';
+                mensajeError.style.display = 'block';
+                return;
+            }
+
+            try {
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch('/guardar-vehiculo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                const resultado = await res.json();
+
+                if (res.ok) {
+                    mensajeExito.textContent = `✅ Vehículo guardado correctamente. ID: ${resultado.id}`;
+                    mensajeExito.style.display = 'block';
+                    
+                    // Limpiar formulario
+                    document.getElementById('formVehiculo').reset();
+                    
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = 'compra-venta.html';
+                    }, 2000);
+                } else {
+                    mensajeError.textContent = `❌ ${resultado.error || 'Error al guardar'}`;
+                    mensajeError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mensajeError.textContent = '❌ Error de conexión con el servidor';
+                mensajeError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
