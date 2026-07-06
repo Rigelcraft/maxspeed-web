@@ -80,9 +80,30 @@ const servidor = http.createServer(async (req, res) => {
     // 🔥 PRIMERO: RUTAS DE API (ANTES DE ARCHIVOS ESTÁTICOS)
     // ============================================================
 
-    // === RUTAS DE VEHÍCULOS ===
-    if (req.method === 'GET' && req.url === '/obtener-vehiculos') {
+    // === RUTAS DE VEHÍCULOS CON SEGURIDAD ===
+    
+    // GET - Obtener todos los vehículos (CON VERIFICACIÓN DE PIN)
+    if (req.method === 'GET' && req.url.startsWith('/obtener-vehiculos')) {
         try {
+            // Extraer el PIN de la URL
+            const urlParams = new URL(req.url, `http://${req.headers.host}`);
+            const pin = urlParams.searchParams.get('pin');
+            
+            // Verificar si el PIN está presente
+            if (!pin) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Se requiere PIN de autenticación" }));
+                return;
+            }
+            
+            // Verificar que el PIN sea admin
+            if (!PINES_ADMIN.includes(pin)) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "PIN no autorizado" }));
+                return;
+            }
+            
+            // Si el PIN es correcto, devolver los vehículos
             const vehiculos = await Vehiculo.find({}).sort({ fechaCreacion: -1 });
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(vehiculos));
@@ -612,14 +633,14 @@ const servidor = http.createServer(async (req, res) => {
 });
 
 // ============================================================
-// INICIAR SERVIDOR - VERSIÓN CORREGIDA
+// INICIAR SERVIDOR
 // ============================================================
 servidor.listen(PUERTO, () => {
-    console.log(`\n🚀 Servidor funcionando con rutas de vehículos`);
+    console.log(`\n🚀 Servidor funcionando con rutas de vehículos y seguridad`);
     console.log(`📌 Puerto: ${PUERTO}`);
     console.log(`📌 Modelos: Cliente, Inventario, Vehiculo`);
     console.log(`📌 Rutas de vehículos disponibles:`);
-    console.log(`   GET    /obtener-vehiculos`);
+    console.log(`   GET    /obtener-vehiculos (requiere PIN)`);
     console.log(`   GET    /obtener-vehiculo/:id`);
     console.log(`   POST   /guardar-vehiculo`);
     console.log(`   PUT    /actualizar-vehiculo/:id`);
