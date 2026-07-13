@@ -118,6 +118,25 @@ const servidor = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && req.url.startsWith('/obtener-vehiculo/')) {
         try {
+            // Extraer el PIN de la URL
+            const urlParams = new URL(req.url, `http://${req.headers.host}`);
+            const pin = urlParams.searchParams.get('pin');
+            
+            // Verificar si el PIN está presente
+            if (!pin) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Se requiere PIN de autenticación" }));
+                return;
+            }
+            
+            // Verificar que el PIN sea admin
+            if (!PINES_ADMIN.includes(pin)) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "PIN no autorizado" }));
+                return;
+            }
+            
+            // Si el PIN es correcto, obtener el vehículo
             const id = req.url.split('/')[2];
             const vehiculo = await Vehiculo.findById(id);
             
