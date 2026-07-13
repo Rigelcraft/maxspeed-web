@@ -233,11 +233,6 @@
             -webkit-appearance: none;
             margin: 0;
         }
-
-        .input-precio-obs {
-            width: 100% !important; 
-            box-sizing: border-box; 
-        }
         
         .campo textarea {
             width: 100%;
@@ -436,12 +431,7 @@
                 <textarea id="observaciones" rows="3" readonly></textarea>
             </div>
             
-            <div class="campo" style="margin-top: 10px;">
-                <label for="precio-observacion">PRECIO DE OBSERVACIÓN (OPCIONAL)</label>
-                <input type="number" id="precio-observacion" class="input-precio-obs" oninput="calcularTotal()" readonly>
-            </div>
-            
-            <div style="text-align: right; margin-top: 5px; font-weight: bold; color: #2e7d32; font-size: 1.1rem; padding-right: 5px;">
+            <div style="text-align: right; margin-top: 15px; font-weight: bold; color: #2e7d32; font-size: 1.1rem; padding-right: 5px;">
                 TOTAL COBRADO: $<span id="total-final">0.00</span>
             </div>
                                 
@@ -457,7 +447,6 @@
         let trabajoActual = null;
         let modoEdicion = false;
 
-        // REGLA DE ORO DE CAPTURA: Detectamos si entró un cliente o papá
         const tipoUsuario = localStorage.getItem('tipoUsuario') || 'cliente';
 
         const datosAutos = {
@@ -490,13 +479,11 @@
 
             trabajoActual = JSON.parse(datosTemporales);
             
-            // Mostrar botón de eliminar solo si es admin
             if (tipoUsuario === 'admin') {
                 const btnEliminar = document.getElementById('btnEliminarRegistro');
                 if (btnEliminar) btnEliminar.style.display = 'block';
             }
             
-            // Si es cliente, ocultamos el botón de editar
             if (tipoUsuario === 'cliente') {
                 const btnEditar = document.getElementById('btnAccionPrincipal');
                 if (btnEditar) btnEditar.style.display = 'none';
@@ -555,7 +542,6 @@
             }
 
             document.getElementById('observaciones').value = trabajoActual.observacionesAdicionales || '';
-            document.getElementById('precio-observacion').value = trabajoActual.precioObservacion || '';
             document.getElementById('total-final').textContent = parseFloat(trabajoActual.total || 0).toFixed(2);
         }
 
@@ -648,8 +634,6 @@
             precios.forEach(input => {
                 total += parseFloat(input.value) || 0;
             });
-            const precioObs = parseFloat(document.getElementById('precio-observacion').value) || 0;
-            total += precioObs;
             document.getElementById('total-final').textContent = total.toFixed(2);
         }
 
@@ -699,7 +683,6 @@
             });
         }
 
-        // Evento para formatear placa
         const inputPlaca = document.getElementById('placas');
         if (inputPlaca) {
             inputPlaca.addEventListener('input', (e) => {
