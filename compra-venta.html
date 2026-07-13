@@ -432,7 +432,11 @@
         }
 
         function verVehiculo(id) {
+            console.log("🚗 ID del vehículo seleccionado:", id);
             localStorage.setItem('vehiculoSeleccionado', id);
+            // Verificar que se guardó correctamente
+            const guardado = localStorage.getItem('vehiculoSeleccionado');
+            console.log("📌 Guardado en localStorage:", guardado);
             window.location.href = 'ver-vehiculo.html';
         }
 

@@ -354,26 +354,40 @@
         async function cargarVehiculo() {
             try {
                 vehiculoId = localStorage.getItem('vehiculoSeleccionado');
+                console.log("🔍 ID recuperado de localStorage:", vehiculoId);
+                
                 if (!vehiculoId) {
+                    console.error("❌ No hay ID en localStorage");
                     document.getElementById('detalleContainer').innerHTML = `
-                        <div class="empty">❌ No se encontró el vehículo</div>
+                        <div class="empty">❌ No se encontró el vehículo (ID vacío)</div>
                     `;
                     return;
                 }
 
                 const pin = localStorage.getItem('pinValidated');
-                const res = await fetch(`/obtener-vehiculo/${vehiculoId}?pin=${pin}`);
+                console.log("🔑 PIN:", pin);
+                
+                const url = `/obtener-vehiculo/${vehiculoId}?pin=${pin}`;
+                console.log("📡 Llamando a:", url);
+                
+                const res = await fetch(url);
+                console.log("📌 Status:", res.status);
                 
                 if (!res.ok) {
-                    throw new Error('Vehículo no encontrado');
+                    const errorText = await res.text();
+                    console.error("❌ Error respuesta:", errorText);
+                    throw new Error(`Error ${res.status}: ${errorText}`);
                 }
 
-                vehiculoActual = await res.json();
+                const data = await res.json();
+                console.log("✅ Datos recibidos:", data);
+                
+                vehiculoActual = data;
                 mostrarDetalle(vehiculoActual);
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Error en cargarVehiculo:', error);
                 document.getElementById('detalleContainer').innerHTML = `
-                    <div class="empty">❌ Error al cargar el vehículo</div>
+                    <div class="empty">❌ Error al cargar el vehículo: ${error.message}</div>
                 `;
             }
         }
