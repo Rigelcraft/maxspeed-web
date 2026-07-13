@@ -773,16 +773,22 @@
             if(descElem) descElem.textContent = descripcion;
             
             let items = [];
-            if (moduloActual === "taller" || moduloActual === "todo") {
-                items = items.concat(todosLosTrabajos);
-            }
             
-            if (moduloActual === "vehiculos" || moduloActual === "todo") {
-                // items = items.concat(todosLosVehiculos);
+            // Si el módulo es "todo", metemos absolutamente todo
+            if (moduloActual === "todo") {
+                items = todosLosTrabajos;
+            } 
+            // Si es "taller", filtramos solo los elementos que tengan tipo "taller"
+            else if (moduloActual === "taller") {
+                items = todosLosTrabajos.filter(item => item.tipo === "taller");
+            } 
+            // Si es "vehiculos", filtramos solo los elementos que tengan tipo "vehiculo"
+            else if (moduloActual === "vehiculos") {
+                items = todosLosTrabajos.filter(item => item.tipo === "vehiculo");
             }
             
             return items.filter(item => {
-                // 🔥 CREAR FECHA SIN ZONA HORARIA
+                // CREAR FECHA SIN ZONA HORARIA
                 const fechaStr = item.fecha.split('T')[0];
                 const [year, month, day] = fechaStr.split('-').map(Number);
                 const fechaTrabajo = new Date(year, month - 1, day);
@@ -819,8 +825,9 @@
             // ============================================================
             const gananciaPorDiaTotal = totalGananciaReal / totalDiasPeriodo;
 
-            document.getElementById('listaTitulo').textContent = "📋 Últimos trabajos";
-            document.getElementById('totalLabel').textContent = "💰 GANANCIA REAL (ingresos - costo repuestos)";
+            // Busca estas dos líneas en tu actualizarVista():
+            document.getElementById('listaTitulo').textContent = moduloActual === "taller" ? "📋 Últimos trabajos" : moduloActual === "vehiculos" ? "🚗 Vehículos vendidos" : "📊 Historial Completo";
+            document.getElementById('totalLabel').textContent = moduloActual === "taller" ? "💰 GANANCIA TALLER (ingresos - repuestos)" : moduloActual === "vehiculos" ? "💰 GANANCIA COMPRA/VENTA" : "💰 GANANCIA REAL TOTAL";
             
             // Mostrar GANANCIA REAL en la tarjeta principal
             document.getElementById('totalAcumulado').textContent = `$${totalGananciaReal.toFixed(2)}`;
