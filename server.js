@@ -42,8 +42,9 @@ const vehiculoSchema = new mongoose.Schema({
     reparaciones: [{
         descripcion: { type: String },
         costo: { type: Number, default: 0 },
-        fecha: { type: Date, default: Date.now },
-        proveedor: { type: String, default: '' }
+        proveedor: { type: String, default: '' },
+        detalles: { type: String, default: '' },
+        fecha: { type: Date, default: Date.now }
     }],
     costoTotalReparaciones: { type: Number, default: 0 },
     costoTotal: { type: Number, default: 0 },
@@ -637,6 +638,37 @@ const servidor = http.createServer(async (req, res) => {
             res.end(JSON.stringify({ error: "Error al obtener clientes" }));
         }
         return;
+    }
+
+    // === RUTA PARA OBTENER VEHÍCULOS VENDIDOS (para caja) ===
+    if (req.method === 'GET' && req.url === '/obtener-vehiculos-caja') {
+        try {
+            const urlParams = new URL(req.url, `http://${req.headers.host}`);
+            const pin = urlParams.searchParams.get('pin');
+            
+            if (!pin) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Se requiere PIN de autenticación" }));
+                return;
+            }
+            
+            if (!PINES_ADMIN.includes(pin)) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "PIN no autorizado" }));
+                return;
+            }
+            
+            // Obtener solo vehículos vendidos
+            const vehiculos = await Vehiculo.find({ estado: 'vendido' }).sort({ fechaVenta: -1 });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(vehiculos));
+            return;
+        } catch (error) {
+            console.error("Error obteniendo vehículos para caja:", error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: "Error al obtener vehículos" }));
+            return;
+        }
     }
 
     if (req.method === 'POST' && req.url === '/eliminar-por-id') {

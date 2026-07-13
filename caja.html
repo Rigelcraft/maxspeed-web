@@ -606,6 +606,8 @@
         async function cargarDatos() {
             try {
                 const pinGuardado = localStorage.getItem('pinValidated');
+                
+                // 1. Cargar trabajos de taller
                 const res = await fetch(`/obtener-clientes?pin=${pinGuardado}`);
                 datosOriginales = await res.json();
                 if (datosOriginales.error) return;
@@ -616,14 +618,10 @@
                     const diasDuracion = calcularDias(registro.fechaIngreso, registro.fechaSalida);
                     let trabajoAgregado = false;
                     
-                    // ============================================================
-                    // NUEVO: Calcular costo de repuestos para este registro
-                    // ============================================================
                     let costoRepuestos = 0;
                     if (registro.repuestos && registro.repuestos.length > 0) {
                         registro.repuestos.forEach(rep => {
                             if (rep.descripcion) {
-                                // Buscar el producto en inventario por nombre
                                 const producto = inventarioProductos.find(p => p.nombre === rep.descripcion);
                                 if (producto) {
                                     costoRepuestos += parseFloat(producto.costo) || 0;
@@ -643,8 +641,8 @@
                                     gananciaPorDia: parseFloat(trabajo.precio) / diasDuracion,
                                     descripcion: trabajo.descripcion,
                                     precio: parseFloat(trabajo.precio) || 0,
-                                    costoRepuestos: costoRepuestos, // ← NUEVO
-                                    gananciaReal: parseFloat(trabajo.precio) - costoRepuestos, // ← NUEVO
+                                    costoRepuestos: costoRepuestos,
+                                    gananciaReal: parseFloat(trabajo.precio) - costoRepuestos,
                                     vehiculo: registro.vehiculo?.modelo || "N/A",
                                     tipo: "taller"
                                 });
@@ -662,8 +660,8 @@
                             gananciaPorDia: parseFloat(registro.total) / diasDuracion,
                             descripcion: registro.observacionesAdicionales || "Servicio completo",
                             precio: parseFloat(registro.total) || 0,
-                            costoRepuestos: costoRepuestos, // ← NUEVO
-                            gananciaReal: parseFloat(registro.total) - costoRepuestos, // ← NUEVO
+                            costoRepuestos: costoRepuestos,
+                            gananciaReal: parseFloat(registro.total) - costoRepuestos,
                             vehiculo: registro.vehiculo?.modelo || "N/A",
                             tipo: "taller"
                         });
@@ -671,6 +669,43 @@
                 });
                 
                 console.log(`✅ ${todosLosTrabajos.length} trabajos de taller`);
+                
+                // ============================================================
+                // 🔥 NUEVO: Cargar vehículos vendidos para la caja
+                // ============================================================
+                try {
+                    const resVehiculos = await fetch(`/obtener-vehiculos-caja?pin=${pinGuardado}`);
+                    const vehiculosVendidos = await resVehiculos.json();
+                    
+                    if (!vehiculosVendidos.error && Array.isArray(vehiculosVendidos)) {
+                        vehiculosVendidos.forEach(v => {
+                            if (v.precioVenta && v.precioVenta > 0) {
+                                const fechaVenta = v.fechaVenta || v.fechaCreacion || new Date().toISOString();
+                                const gananciaReal = (v.precioVenta || 0) - (v.costoTotal || 0);
+                                
+                                todosLosTrabajos.push({
+                                    id: v._id,
+                                    cliente: v.compradorFinal || "Venta de vehículo",
+                                    fecha: fechaVenta,
+                                    diasDuracion: 1,
+                                    gananciaPorDia: gananciaReal,
+                                    descripcion: `🚗 Venta: ${v.marca} ${v.modelo} ${v.año || ''} - ${v.placa || 'S/P'}`,
+                                    precio: v.precioVenta || 0,
+                                    costoRepuestos: v.costoTotal || 0,
+                                    gananciaReal: gananciaReal,
+                                    vehiculo: `${v.marca} ${v.modelo}`,
+                                    tipo: "vehiculo",
+                                    esVentaVehiculo: true,
+                                    patente: v.placa || ''
+                                });
+                            }
+                        });
+                        console.log(`✅ ${vehiculosVendidos.length} vehículos vendidos agregados a caja`);
+                    }
+                } catch (error) {
+                    console.error("Error cargando vehículos vendidos:", error);
+                }
+                
             } catch (error) {
                 console.error("Error:", error);
             }
@@ -804,22 +839,33 @@
             }
             
             items.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            contenedor.innerHTML = items.slice(0, 20).map(t => `
-                <div class="item-trabajo" onclick="verDetalle('${t.id}')">
-                    <div class="flex-between">
-                        <span class="cliente-nombre">👤 ${escapeHtml(t.cliente)}</span>
-                        <span class="fecha-trabajo">${formatearFecha(t.fecha)}</span>
+            contenedor.innerHTML = items.slice(0, 20).map(t => {
+                // Si es venta de vehículo, mostrar ícono diferente
+                const icono = t.tipo === "vehiculo" ? "🚗" : "🔧";
+                const clienteDisplay = t.tipo === "vehiculo" ? `👤 ${escapeHtml(t.cliente)}` : `👤 ${escapeHtml(t.cliente)}`;
+                
+                return `
+                    <div class="item-trabajo" onclick="verDetalle('${t.id}')">
+                        <div class="flex-between">
+                            <span class="cliente-nombre">${icono} ${escapeHtml(t.cliente)}</span>
+                            <span class="fecha-trabajo">${formatearFecha(t.fecha)}</span>
+                        </div>
+                        <div class="trabajo-desc">${escapeHtml(t.descripcion)}</div>
+                        <div class="flex-between">
+                            <span class="ganancia-diaria">
+                                ${t.tipo === "vehiculo" ? '💰 Venta' : `⏱️ ${t.diasDuracion} día(s)`}
+                            </span>
+                            <span class="precio">💰 $${t.precio.toFixed(2)}</span>
+                        </div>
+                        <div style="font-size:0.65rem; color:#888; margin-top:4px;">
+                            ${t.tipo === "vehiculo" 
+                                ? `Costo total: $${(t.costoRepuestos || 0).toFixed(2)} | Ganancia: $${(t.gananciaReal || 0).toFixed(2)}` 
+                                : `Costo repuestos: $${(t.costoRepuestos || 0).toFixed(2)} | Ganancia real: $${(t.gananciaReal || 0).toFixed(2)}`
+                            }
+                        </div>
                     </div>
-                    <div class="trabajo-desc">🔧 ${escapeHtml(t.descripcion)} (${escapeHtml(t.vehiculo)})</div>
-                    <div class="flex-between">
-                        <span class="ganancia-diaria">⏱️ ${t.diasDuracion} día(s) - $${(t.diasDuracion > 0 ? (t.gananciaReal || 0) / t.diasDuracion : 0).toFixed(2)}/día</span>
-                        <span class="precio">💰 $${t.precio.toFixed(2)}</span>
-                    </div>
-                    <div style="font-size:0.65rem; color:#888; margin-top:4px;">
-                        Costo repuestos: $${(t.costoRepuestos || 0).toFixed(2)} | Ganancia real: $${(t.gananciaReal || 0).toFixed(2)}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         function formatearFecha(fechaISO) {

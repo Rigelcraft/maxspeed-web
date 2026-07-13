@@ -307,6 +307,28 @@
             background: #e74c3c;
             color: white;
         }
+
+        .modal-contenido input, .modal-contenido textarea {
+            box-sizing: border-box;
+        }
+
+        .modal-contenido label {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #555;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Animación suave para el modal */
+        .modal-overlay {
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -420,7 +442,7 @@
                     
                     <div class="campo">
                         <span class="campo-label">🔢 Placa</span>
-                        <span class="campo-valor">${escapeHtml(v.placa || 'Sin placa')}</span>
+                        <span class="campo-valor">${escapeHtml(v.patente || 'Sin placa')}</span>
                     </div>
                     <div class="campo">
                         <span class="campo-label">🎨 Color</span>
@@ -535,7 +557,8 @@
                     body: JSON.stringify({
                         estado: 'vendido',
                         precioVenta: precioVenta,
-                        compradorFinal: compradorFinal
+                        compradorFinal: compradorFinal,
+                        fechaVenta: new Date().toISOString() // ← Asegurar que se guarda la fecha
                     })
                 });
 
@@ -555,32 +578,114 @@
         }
 
         // ============================================================
-        // AGREGAR REPARACIÓN (simple por ahora)
+        // AGREGAR REPARACIÓN - VERSIÓN MEJORADA CON FORMULARIO COMPLETO
         // ============================================================
-        function agregarReparacion() {
-            const descripcion = prompt('📝 Descripción de la reparación:');
-            if (!descripcion) return;
 
-            const costo = prompt('💰 Costo de la reparación:');
-            if (!costo || isNaN(costo) || parseFloat(costo) <= 0) {
-                alert('⚠️ Ingresa un costo válido');
+        function agregarReparacion() {
+            // Crear un modal dinámico para la reparación
+            const modalHTML = `
+                <div class="modal-overlay" id="modalReparacion" style="display:flex;">
+                    <div class="modal-contenido" style="max-width:400px; width:95%; max-height:90vh; overflow-y:auto;">
+                        <h3 style="margin-bottom:15px; color:#2c3e50;">🔧 Nueva Reparación</h3>
+                        
+                        <div style="margin-bottom:12px;">
+                            <label style="font-weight:bold; font-size:0.85rem; color:#555; display:block; margin-bottom:4px;">📝 Descripción del trabajo *</label>
+                            <input type="text" id="repDescripcion" placeholder="Ej. Cambio de aceite y filtros" style="width:100%; padding:10px; border:3px solid #000; border-radius:10px; font-size:14px;">
+                        </div>
+                        
+                        <div style="margin-bottom:12px;">
+                            <label style="font-weight:bold; font-size:0.85rem; color:#555; display:block; margin-bottom:4px;">💰 Costo de la reparación *</label>
+                            <input type="number" id="repCosto" placeholder="0.00" step="0.01" style="width:100%; padding:10px; border:3px solid #000; border-radius:10px; font-size:14px;">
+                        </div>
+                        
+                        <div style="margin-bottom:12px;">
+                            <label style="font-weight:bold; font-size:0.85rem; color:#555; display:block; margin-bottom:4px;">🏢 Proveedor (quien realizó el trabajo)</label>
+                            <input type="text" id="repProveedor" placeholder="Ej. Taller Mecánico XYZ" style="width:100%; padding:10px; border:3px solid #000; border-radius:10px; font-size:14px;">
+                        </div>
+                        
+                        <div style="margin-bottom:12px;">
+                            <label style="font-weight:bold; font-size:0.85rem; color:#555; display:block; margin-bottom:4px;">📅 Fecha de la reparación</label>
+                            <input type="date" id="repFecha" style="width:100%; padding:10px; border:3px solid #000; border-radius:10px; font-size:14px;">
+                        </div>
+                        
+                        <div style="margin-bottom:12px;">
+                            <label style="font-weight:bold; font-size:0.85rem; color:#555; display:block; margin-bottom:4px;">📋 Detalles adicionales</label>
+                            <textarea id="repDetalles" rows="3" placeholder="Ej. Se cambió el aceite 10W30, filtro de aceite y filtro de aire. Quedó listo para circulación." style="width:100%; padding:10px; border:3px solid #000; border-radius:10px; font-size:14px; resize:vertical;"></textarea>
+                        </div>
+                        
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button onclick="cerrarModalReparacion()" style="flex:1; padding:12px; background:#e74c3c; color:white; border:3px solid #000; border-radius:12px; font-weight:bold; cursor:pointer;">Cancelar</button>
+                            <button onclick="guardarReparacionMejorada()" style="flex:2; padding:12px; background:#27ae60; color:white; border:3px solid #000; border-radius:12px; font-weight:bold; cursor:pointer;">💾 Guardar Reparación</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Agregar modal al DOM
+            const modalContainer = document.createElement('div');
+            modalContainer.id = 'modalReparacionContainer';
+            modalContainer.innerHTML = modalHTML;
+            document.body.appendChild(modalContainer);
+
+            // Establecer fecha actual por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('repFecha').value = hoy;
+
+            // Cerrar modal al hacer clic fuera
+            document.getElementById('modalReparacion').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    cerrarModalReparacion();
+                }
+            });
+        }
+
+        function cerrarModalReparacion() {
+            const container = document.getElementById('modalReparacionContainer');
+            if (container) container.remove();
+        }
+
+        async function guardarReparacionMejorada() {
+            // Obtener valores del formulario
+            const descripcion = document.getElementById('repDescripcion').value.trim();
+            const costo = parseFloat(document.getElementById('repCosto').value);
+            const proveedor = document.getElementById('repProveedor').value.trim();
+            const fecha = document.getElementById('repFecha').value;
+            const detalles = document.getElementById('repDetalles').value.trim();
+
+            // Validaciones
+            if (!descripcion) {
+                alert('⚠️ La descripción del trabajo es obligatoria');
+                document.getElementById('repDescripcion').focus();
                 return;
             }
 
-            // Guardar reparación
-            guardarReparacion(descripcion, parseFloat(costo));
-        }
+            if (!costo || costo <= 0) {
+                alert('⚠️ Ingresa un costo válido mayor a 0');
+                document.getElementById('repCosto').focus();
+                return;
+            }
 
-        async function guardarReparacion(descripcion, costo) {
+            // Confirmar antes de guardar
+            const confirmar = confirm(
+                `📋 Confirmar reparación:\n\n` +
+                `🔧 Trabajo: ${descripcion}\n` +
+                `💰 Costo: $${costo.toFixed(2)}\n` +
+                `${proveedor ? `🏢 Proveedor: ${proveedor}\n` : ''}` +
+                `\n¿Guardar esta reparación?`
+            );
+
+            if (!confirmar) return;
+
             try {
-                const reparacion = {
+                // Clonamos el array de reparaciones actual y añadimos la nueva
+                const nuevasReparaciones = [...(vehiculoActual.reparaciones || [])];
+                nuevasReparaciones.push({
                     descripcion: descripcion,
                     costo: costo,
-                    fecha: new Date().toISOString()
-                };
-
-                const reparacionesActuales = vehiculoActual.reparaciones || [];
-                const nuevasReparaciones = [...reparacionesActuales, reparacion];
+                    proveedor: proveedor,
+                    detalles: detalles,
+                    fecha: fecha ? new Date(fecha).toISOString() : new Date().toISOString()
+                });
 
                 const pin = localStorage.getItem('pinValidated');
                 const res = await fetch(`/actualizar-vehiculo/${vehiculoId}?pin=${pin}`, {
@@ -594,10 +699,46 @@
                 const resultado = await res.json();
 
                 if (res.ok) {
-                    alert('✅ Reparación agregada correctamente');
+                    alert('✅ Reparación guardada con éxito');
+                    cerrarModalReparacion();
+                    cargarVehiculo(); // Recarga los detalles actualizados en la pantalla
+                } else {
+                    alert(`❌ Error del servidor: ${resultado.error || 'No se pudo guardar'}`);
+                }
+            } catch (error) {
+                console.error('Error al guardar reparación:', error);
+                alert('❌ Error de conexión con el servidor.');
+            }
+        }
+
+        // ============================================================
+        // ELIMINAR REPARACIÓN INDIVIDUAL
+        // ============================================================
+        async function eliminarReparacion(index) {
+            if (!confirm(`⚠️ ¿Eliminar esta reparación?\n\n"${vehiculoActual.reparaciones[index].descripcion}"\nCosto: $${vehiculoActual.reparaciones[index].costo.toFixed(2)}`)) {
+                return;
+            }
+
+            try {
+                const reparacionesActuales = vehiculoActual.reparaciones || [];
+                const nuevasReparaciones = reparacionesActuales.filter((_, i) => i !== index);
+
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch(`/actualizar-vehiculo/${vehiculoId}?pin=${pin}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reparaciones: nuevasReparaciones
+                    })
+                });
+
+                const resultado = await res.json();
+
+                if (res.ok) {
+                    alert('✅ Reparación eliminada correctamente');
                     cargarVehiculo();
                 } else {
-                    alert(`❌ ${resultado.error || 'Error al agregar reparación'}`);
+                    alert(`❌ ${resultado.error || 'Error al eliminar reparación'}`);
                 }
             } catch (error) {
                 console.error('Error:', error);
