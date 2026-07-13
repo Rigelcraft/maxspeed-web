@@ -592,6 +592,37 @@ const servidor = http.createServer(async (req, res) => {
         return;
     }
 
+    if (req.method === 'POST' && req.url === '/actualizar-registro') {
+        let cuerpo = '';
+        req.on('data', pedacito => { cuerpo += pedacito; });
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(cuerpo);
+                const { _id, ...datosActualizar } = datos;
+
+                if (!_id) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: "Se requiere el ID del registro para actualizar." }));
+                    return;
+                }
+
+                // Actualizamos todos los campos que vengan en el objeto
+                await Cliente.updateOne(
+                    { _id: _id },
+                    { $set: datosActualizar }
+                );
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ mensaje: "Registro completo actualizado correctamente." }));
+            } catch (e) {
+                console.error("❌ Error al actualizar registro:", e);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: "Error interno del servidor al actualizar." }));
+            }
+        });
+        return;
+    }
+
     if (req.method === 'GET' && req.url.startsWith('/obtener-clientes')) {
         try {
             const urlParams = new URL(req.url, `http://${req.headers.host}`);

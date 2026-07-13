@@ -640,6 +640,7 @@
         function procesarActualizacion() {
             // 1. Recolectar los datos de los campos básicos
             const datosParaActualizar = {
+                _id: trabajoActual._id, // Es indispensable pasar el ID original de MongoDB
                 fechaIngreso: document.getElementById('fecha-ingreso').value,
                 fechaSalida: document.getElementById('fecha-salida').value,
                 cliente: document.getElementById('nombre').value,
@@ -667,7 +668,7 @@
             filasTrabajos.forEach(fila => {
                 const desc = fila.querySelector('.input-trabajo')?.value;
                 const precio = parseFloat(fila.querySelector('.input-precio')?.value) || 0;
-                if (desc) {
+                if (desc && desc.trim() !== "") {
                     datosParaActualizar.trabajos.push({ descripcion: desc, precio: precio });
                 }
             });
@@ -678,7 +679,7 @@
                 const desc = fila.querySelector('.input-repuesto')?.value;
                 const pvp = parseFloat(fila.querySelector('.input-precio')?.value) || 0;
                 const descPorcentaje = parseFloat(fila.querySelector('.input-descuento')?.value) || 0;
-                if (desc) {
+                if (desc && desc.trim() !== "") {
                     datosParaActualizar.repuestos.push({ 
                         descripcion: desc, 
                         pvp: pvp, 
@@ -687,18 +688,18 @@
                 }
             });
 
-            // 4. Enviar todo al servidor (asegúrate de usar la ruta correcta en tu server, ej: /actualizar-registro)
-            fetch('/actualizar-registro', { 
+            // 4. Enviar todo a la nueva ruta del servidor
+            fetch('/actualizar-registro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosParaActualizar)
             })
             .then(res => res.json())
             .then(data => {
-                if(data.error) {
+                if (data.error) {
                     alert("❌ Error: " + data.error);
                 } else {
-                    alert("✅ Registro actualizado correctamente");
+                    alert("✅ " + data.mensaje);
                     window.location.href = "explorador.html";
                 }
             })
@@ -707,7 +708,7 @@
                 alert("❌ Error de red o servidor al guardar");
             });
         }
-
+        
         function eliminarEsteRegistro() {
             if(!confirm("⚠️ ¿Estás SEGURO? Esto eliminará PERMANENTEMENTE este registro completo. No se puede deshacer.")) return;
             
