@@ -84,7 +84,7 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Distribuye los bloques a los extremos */
+            justify-content: space-between;
             gap: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
@@ -95,12 +95,12 @@
 
         /* Contenedor izquierdo para los textos */
         .producto-info {
-            flex: 1; /* Ocupa todo el espacio libre de la izquierda */
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 4px;
-            min-width: 0; /* Evita que los textos colapsen o rompan el flex */
-            text-align: left; /* Alinea los nombres a la izquierda */
+            min-width: 0;
+            text-align: left;
         }
 
         .producto-nombre {
@@ -108,7 +108,7 @@
             font-size: 1.05rem;
             color: #222;
             line-height: 1.2;
-            word-break: break-word; /* Rompe por palabras de forma natural si es muy largo */
+            word-break: break-word;
         }
 
         .producto-detalle {
@@ -120,7 +120,7 @@
         .producto-precios {
             display: flex;
             flex-direction: column;
-            align-items: flex-end; /* Alinea los costos a la derecha */
+            align-items: flex-end;
             text-align: right;
             min-width: 75px;
             justify-content: center;
@@ -130,7 +130,7 @@
             font-size: 1.1rem;
             font-weight: bold;
             color: #2ecc71;
-            white-space: nowrap; /* Evita que el precio se parta en dos renglones */
+            white-space: nowrap;
         }
 
         .precio-costo {
@@ -166,15 +166,6 @@
             justify-content: center;
         }
 
-        .btn-accion {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        /* --- 4. BOTONES Y MODAL --- */
         .btn-flotante {
             position: fixed;
             bottom: 30px;
@@ -342,6 +333,7 @@
             }
         }
 
+        // FUNCIÓN MODIFICADA ÚNICAMENTE PARA MANEJAR EL TEXTO "AGOTADO" CUANDO EL STOCK ES 0
         function mostrarProductos() {
             const contenedor = document.getElementById('listaProductos');
         
@@ -350,7 +342,15 @@
                 return;
             }
         
-            contenedor.innerHTML = productos.map(p => `
+            contenedor.innerHTML = productos.map(p => {
+                let textoStock = 'Stock';
+                if (parseInt(p.stock) === 0) {
+                    textoStock = '🚫 Agotado';
+                } else if (parseInt(p.stock) < 5) {
+                    textoStock = '⚠️ Bajo';
+                }
+
+                return `
                 <div class="producto-card ${p.stock < 5 ? 'stock-bajo' : ''}">
                     <div class="producto-info">
                         <div class="producto-nombre">${escapeHtml(p.nombre)}</div>
@@ -362,14 +362,15 @@
                     </div>
                     <div class="producto-stock-container">
                         <div class="producto-stock ${p.stock < 5 ? 'bajo' : ''}">${p.stock}</div>
-                        <div style="font-size: 0.6rem; color: #666; font-weight: bold;">${p.stock < 5 ? '⚠️ Bajo' : 'Stock'}</div>
+                        <div style="font-size: 0.6rem; color: #666; font-weight: bold; white-space: nowrap;">${textoStock}</div>
                     </div>
                     <div class="acciones-producto">
                         <button class="btn-accion" onclick="editarProducto('${p._id}')">✏️</button>
                         <button class="btn-accion" onclick="eliminarProducto('${p._id}')">🗑️</button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function abrirModal(producto = null) {
