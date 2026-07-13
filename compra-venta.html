@@ -30,12 +30,24 @@
             background-blend-mode: darken;
             display: block;
             overflow-y: auto;
-            padding: 30px 0 50px 0;
+            padding: 0 0 50px 0; /* Quitamos padding superior para fijar la cabecera bien arriba */
+        }
+
+        /* Cabecera Fija (Sticky) */
+        .cabecera-fija {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            padding: 15px 0 10px 0;
+            border-bottom: 2px solid #222;
         }
 
         .contenedor-principal {
             width: 100%;
-            max-width: 360px;
+            max-width: 1200px; /* Expandido para aprovechar pantallas grandes */
             margin: 0 auto;
             padding: 0 15px;
         }
@@ -45,21 +57,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .logo-imagen {
             max-width: 100%;
-            width: 350px;
+            width: 280px;
             height: auto;
             display: block;
         }
 
         .titulo-seccion {
             color: #ffffff;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000, 0 0 4px #000;
+            text-shadow: 0 0 4px #000;
             text-align: center;
             margin-top: 5px;
         }
@@ -68,7 +80,8 @@
             display: flex;
             gap: 8px;
             width: 100%;
-            margin-bottom: 15px;
+            max-width: 500px; /* Centrado y acotado para que no se estire demasiado */
+            margin: 0 auto 5px auto;
         }
 
         .barra-acciones input {
@@ -99,14 +112,43 @@
             transform: scale(0.95);
         }
 
+        /* Contenedor en Cuadrícula / Grid Responsivo */
+        .grid-vehiculos {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Cambia a 2 columnas en tablets y 3 columnas en pantallas grandes */
+        @media (min-width: 600px) {
+            .grid-vehiculos {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 950px) {
+            .grid-vehiculos {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
         .vehiculo-card {
             background: white;
             border: 4px solid #000;
             border-radius: 18px;
             padding: 14px;
-            margin-bottom: 12px;
+            position: relative;
             cursor: pointer;
-            transition: transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .vehiculo-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .vehiculo-card:active {
@@ -116,20 +158,54 @@
         .vehiculo-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 4px;
+            padding-right: 32px; /* Espacio reservado para el botón eliminar */
         }
 
         .vehiculo-nombre {
             font-size: 1rem;
             font-weight: bold;
             color: #000;
+            word-break: break-word;
         }
 
         .vehiculo-patente {
             font-weight: bold;
             color: #555;
             font-size: 0.8rem;
+            white-space: nowrap;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        /* Botón de eliminación directa rápido */
+        .btn-eliminar-rapido {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ffcbd1;
+            border: 2px solid #000;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.1s;
+            z-index: 5;
+        }
+
+        .btn-eliminar-rapido:hover {
+            background: #e74c3c;
+        }
+
+        .btn-eliminar-rapido:active {
+            transform: scale(0.9);
         }
 
         .vehiculo-detalles {
@@ -197,11 +273,12 @@
 
         .loading, .empty {
             text-align: center;
-            padding: 30px;
+            padding: 40px;
             font-weight: bold;
             color: #fff;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             text-shadow: 1px 1px 3px #000;
+            grid-column: 1 / -1; /* Ocupa todo el ancho del grid */
         }
 
         .empty span {
@@ -213,8 +290,9 @@
 
         .btn-volver {
             width: 100%;
+            max-width: 300px;
             padding: 15px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: white;
             background-color: #7f8c8d;
@@ -222,7 +300,8 @@
             border-radius: 20px;
             cursor: pointer;
             text-align: center;
-            margin-top: 10px;
+            margin: 20px auto 0 auto;
+            display: block;
         }
 
         .btn-volver:active {
@@ -245,18 +324,25 @@
     </style>
 </head>
 <body>
+
+    <!-- Cabecera y buscador fijos arriba -->
+    <div class="cabecera-fija">
+        <div class="contenedor-principal">
+            <div class="bloque-encabezado">
+                <img src="logo.png" alt="MaxSpeed" class="logo-imagen">
+                <h1 class="titulo-seccion">🚗 Compra y Venta</h1>
+            </div>
+
+            <div class="barra-acciones">
+                <input type="text" id="buscadorVehiculo" placeholder="🔍 Buscar vehículo...">
+                <button class="btn-nuevo" onclick="agregarVehiculo()">➕ Nuevo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cuerpo principal con la lista expandible -->
     <div class="contenedor-principal">
-        <div class="bloque-encabezado">
-            <img src="logo.png" alt="MaxSpeed" class="logo-imagen">
-            <h1 class="titulo-seccion">🚗 Compra y Venta</h1>
-        </div>
-
-        <div class="barra-acciones">
-            <input type="text" id="buscadorVehiculo" placeholder="🔍 Buscar vehículo...">
-            <button class="btn-nuevo" onclick="agregarVehiculo()">➕ Nuevo</button>
-        </div>
-
-        <div id="listaVehiculos">
+        <div id="listaVehiculos" class="grid-vehiculos">
             <div class="loading">Cargando vehículos...</div>
         </div>
 
@@ -277,22 +363,18 @@
         // CARGAR VEHÍCULOS - CON VERIFICACIÓN DE PIN
         async function cargarVehiculos() {
             try {
-                // Obtener el PIN del localStorage
                 const pin = localStorage.getItem('pinValidated');
                 console.log("🔑 PIN que se envía:", pin);
                 
-                // Si no hay PIN, redirigir al login
                 if (!pin) {
                     alert("⛔ No hay PIN guardado. Inicia sesión nuevamente.");
                     window.location.href = "index.html";
                     return;
                 }
                 
-                // Enviar solicitud con PIN
                 const res = await fetch(`/obtener-vehiculos?pin=${pin}`);
                 console.log("📌 Status:", res.status);
                 
-                // Si es 401 o 403, el PIN no es válido
                 if (res.status === 401 || res.status === 403) {
                     alert("⛔ PIN no autorizado. Inicia sesión nuevamente.");
                     localStorage.removeItem('pinValidated');
@@ -346,6 +428,9 @@
 
                 return `
                     <div class="vehiculo-card" onclick="verVehiculo('${v._id}')">
+                        <!-- Botón directo de eliminar rápido -->
+                        <button class="btn-eliminar-rapido" onclick="eliminarVehiculoRapido(event, '${v._id}', '${escapeHtml(v.marca)} ${escapeHtml(v.modelo)}')">🗑️</button>
+                        
                         <div class="vehiculo-header">
                             <span class="vehiculo-nombre">${escapeHtml(v.marca || '')} ${escapeHtml(v.modelo || '')} ${v.año || ''}</span>
                             <span class="vehiculo-patente">${escapeHtml(v.patente || 'S/P')}</span>
@@ -388,6 +473,39 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // ============================================================
+        // ELIMINACIÓN DIRECTA RÁPIDA
+        // ============================================================
+        async function eliminarVehiculoRapido(event, id, nombreVehiculo) {
+            // Evita que al dar clic se abra la vista de detalles del carro
+            event.stopPropagation();
+            
+            if (!confirm(`⚠️ ¿Estás seguro de que deseas eliminar permanentemente el vehículo: ${nombreVehiculo}?`)) {
+                return;
+            }
+
+            try {
+                const pin = localStorage.getItem('pinValidated');
+                const res = await fetch(`/eliminar-vehiculo/${id}?pin=${pin}`, {
+                    method: 'DELETE'
+                });
+
+                const resultado = await res.json();
+
+                if (res.ok) {
+                    alert("🗑️ Vehículo eliminado correctamente.");
+                    // Refrescar la lista de forma inmediata localmente
+                    todosLosVehiculos = todosLosVehiculos.filter(v => v._id !== id);
+                    mostrarVehiculos(todosLosVehiculos);
+                } else {
+                    alert(`❌ Error: ${resultado.error || 'No se pudo eliminar el vehículo'}`);
+                }
+            } catch (error) {
+                console.error("Error al eliminar:", error);
+                alert("❌ Error de conexión al intentar eliminar.");
+            }
         }
 
         // ============================================================
@@ -435,7 +553,6 @@
         function verVehiculo(id) {
             console.log("🚗 ID del vehículo seleccionado:", id);
             localStorage.setItem('vehiculoSeleccionado', id);
-            // Verificar que se guardó correctamente
             const guardado = localStorage.getItem('vehiculoSeleccionado');
             console.log("📌 Guardado en localStorage:", guardado);
             window.location.href = 'ver-vehiculo.html';
