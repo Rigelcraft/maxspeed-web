@@ -638,24 +638,73 @@
         }
 
         function procesarActualizacion() {
+            // 1. Recolectar los datos de los campos básicos
             const datosParaActualizar = {
+                fechaIngreso: document.getElementById('fecha-ingreso').value,
+                fechaSalida: document.getElementById('fecha-salida').value,
+                cliente: document.getElementById('nombre').value,
+                pinCliente: document.getElementById('pin-cliente').value,
                 cedulaRuc: document.getElementById('cedula').value,
-                nuevoPin: document.getElementById('pin-cliente').value 
+                telefono: document.getElementById('telefono').value,
+                direccion: document.getElementById('direccion').value,
+                email: document.getElementById('email').value,
+                vehiculo: {
+                    marca: document.getElementById('marca').value,
+                    modelo: document.getElementById('modelo').value,
+                    anio: document.getElementById('anio').value,
+                    color: document.getElementById('color').value,
+                    placa: document.getElementById('placas').value
+                },
+                responsable: document.getElementById('responsable').value,
+                observacionesAdicionales: document.getElementById('observaciones').value,
+                total: parseFloat(document.getElementById('total-final').textContent) || 0,
+                trabajos: [],
+                repuestos: []
             };
 
-            fetch('/actualizar-pin-masivo', {
+            // 2. Recolectar las filas dinámicas de Trabajos
+            const filasTrabajos = document.querySelectorAll('#contenedor-trabajos .fila-dinamica');
+            filasTrabajos.forEach(fila => {
+                const desc = fila.querySelector('.input-trabajo')?.value;
+                const precio = parseFloat(fila.querySelector('.input-precio')?.value) || 0;
+                if (desc) {
+                    datosParaActualizar.trabajos.push({ descripcion: desc, precio: precio });
+                }
+            });
+
+            // 3. Recolectar las filas dinámicas de Repuestos
+            const filasRepuestos = document.querySelectorAll('#contenedor-repuestos .fila-dinamica');
+            filasRepuestos.forEach(fila => {
+                const desc = fila.querySelector('.input-repuesto')?.value;
+                const pvp = parseFloat(fila.querySelector('.input-precio')?.value) || 0;
+                const descPorcentaje = parseFloat(fila.querySelector('.input-descuento')?.value) || 0;
+                if (desc) {
+                    datosParaActualizar.repuestos.push({ 
+                        descripcion: desc, 
+                        pvp: pvp, 
+                        descuento: descPorcentaje 
+                    });
+                }
+            });
+
+            // 4. Enviar todo al servidor (asegúrate de usar la ruta correcta en tu server, ej: /actualizar-registro)
+            fetch('/actualizar-registro', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosParaActualizar)
             })
             .then(res => res.json())
             .then(data => {
-                alert("✅ " + data.mensaje);
-                window.location.href = "explorador.html";
+                if(data.error) {
+                    alert("❌ Error: " + data.error);
+                } else {
+                    alert("✅ Registro actualizado correctamente");
+                    window.location.href = "explorador.html";
+                }
             })
             .catch(err => {
                 console.error(err);
-                alert("❌ Error al guardar");
+                alert("❌ Error de red o servidor al guardar");
             });
         }
 
