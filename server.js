@@ -142,9 +142,12 @@ const servidor = http.createServer(async (req, res) => {
             }
             
             // Obtener el ID de la URL
-            const id = req.url.split('/')[2];
-            console.log("📌 [SERVER] ID recibido:", id);
-            
+            const idConQuery = req.url.split('/')[2];
+            // Limpiamos el ID separando por el signo '?' y tomando solo la primera parte
+            const id = idConQuery.split('?')[0]; 
+
+            console.log("📌 [SERVER] ID recibido y limpio:", id);
+
             // ✅ VALIDAR que el ID sea un ObjectId válido de MongoDB
             const mongoose = require('mongoose');
             if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -235,10 +238,20 @@ const servidor = http.createServer(async (req, res) => {
         req.on('data', pedacito => { cuerpo += pedacito; });
         req.on('end', async () => {
             try {
-                const id = req.url.split('/')[2];
+                // El original era: const id = req.url.split('/')[2];
+                const idConQuery = req.url.split('/')[2];
+                const id = idConQuery.split('?')[0]; // Limpiamos el ID de parámetros de consulta
+
+                // Validamos que sea un ObjectId correcto
+                if (!mongoose.Types.ObjectId.isValid(id)) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: "ID de vehículo inválido" }));
+                    return;
+                }
+
                 const datos = JSON.parse(cuerpo);
-                
                 const vehiculo = await Vehiculo.findById(id);
+                
                 if (!vehiculo) {
                     res.writeHead(404);
                     res.end(JSON.stringify({ error: "Vehículo no encontrado" }));
@@ -297,7 +310,17 @@ const servidor = http.createServer(async (req, res) => {
 
     if (req.method === 'DELETE' && req.url.startsWith('/eliminar-vehiculo/')) {
         try {
-            const id = req.url.split('/')[2];
+            // El original era: const id = req.url.split('/')[2];
+            const idConQuery = req.url.split('/')[2];
+            const id = idConQuery.split('?')[0]; // Limpiamos el ID de parámetros de consulta
+
+            // Validamos que sea un ObjectId correcto
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "ID de vehículo inválido" }));
+                return;
+            }
+
             const resultado = await Vehiculo.deleteOne({ _id: id });
             
             if (resultado.deletedCount === 0) {
