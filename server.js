@@ -118,12 +118,16 @@ const servidor = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && req.url.startsWith('/obtener-vehiculo/')) {
         try {
+            console.log("📌 [SERVER] Solicitud en /obtener-vehiculo/");
+            
             // Extraer el PIN de la URL
             const urlParams = new URL(req.url, `http://${req.headers.host}`);
             const pin = urlParams.searchParams.get('pin');
+            console.log("📌 [SERVER] PIN:", pin);
             
             // Verificar si el PIN está presente
             if (!pin) {
+                console.log("❌ [SERVER] PIN faltante");
                 res.writeHead(401, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: "Se requiere PIN de autenticación" }));
                 return;
@@ -131,28 +135,46 @@ const servidor = http.createServer(async (req, res) => {
             
             // Verificar que el PIN sea admin
             if (!PINES_ADMIN.includes(pin)) {
+                console.log("❌ [SERVER] PIN no autorizado:", pin);
                 res.writeHead(403, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: "PIN no autorizado" }));
                 return;
             }
             
-            // Si el PIN es correcto, obtener el vehículo
+            // Obtener el ID de la URL
             const id = req.url.split('/')[2];
+            console.log("📌 [SERVER] ID recibido:", id);
+            
+            // ✅ VALIDAR que el ID sea un ObjectId válido de MongoDB
+            const mongoose = require('mongoose');
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                console.log("❌ [SERVER] ID inválido:", id);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "ID de vehículo inválido" }));
+                return;
+            }
+            
+            // Buscar el vehículo en la base de datos
+            console.log("📌 [SERVER] Buscando vehículo en MongoDB...");
             const vehiculo = await Vehiculo.findById(id);
+            console.log("📌 [SERVER] Resultado:", vehiculo ? "Encontrado" : "No encontrado");
             
             if (!vehiculo) {
+                console.log("❌ [SERVER] Vehículo no encontrado");
                 res.writeHead(404);
                 res.end(JSON.stringify({ error: "Vehículo no encontrado" }));
                 return;
             }
             
+            console.log("✅ [SERVER] Vehículo encontrado, enviando respuesta");
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(vehiculo));
             return;
         } catch (error) {
-            console.error("Error obteniendo vehículo:", error);
+            console.error("❌ [SERVER] Error en /obtener-vehiculo/:id:", error);
+            console.error("❌ [SERVER] Stack trace:", error.stack);
             res.writeHead(500);
-            res.end(JSON.stringify({ error: "Error al obtener vehículo" }));
+            res.end(JSON.stringify({ error: "Error al obtener vehículo", detalle: error.message }));
             return;
         }
     }
